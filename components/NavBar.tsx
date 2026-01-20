@@ -21,7 +21,7 @@ const NavBar = () => {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-semi-dark-blue flex justify-between lg:justify-start lg:flex-col items-center py-200 px-200 md:px-250 md:py-250 lg:px-350 lg:py-400 md:rounded-2xl lg:gap-10 h-fit lg:h-[calc(100vh-64px)] lg:fixed lg:left-8 lg:top-8">
+    <nav className="bg-semi-dark-blue flex justify-between lg:justify-start lg:flex-col items-center py-200 px-200 md:px-250 md:py-250 lg:px-350 lg:py-400 md:rounded-2xl lg:gap-900 h-fit lg:h-[calc(100vh-64px)] lg:fixed lg:left-8 lg:top-8">
       <Link href="/">
         <Image
           src={logo}
