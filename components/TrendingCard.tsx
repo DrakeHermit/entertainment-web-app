@@ -22,7 +22,13 @@ const TrendingCard = ({
   return (
     <div className="relative min-w-[240px] md:min-w-[470px] h-[140px] md:h-[230px] rounded-lg overflow-hidden group cursor-pointer mb-500">
       {thumbnail ? (
-        <Image src={thumbnail} alt={title} fill className="object-cover" />
+        <Image
+          src={thumbnail}
+          alt={title}
+          fill
+          className="object-fit"
+          sizes="(max-width: 768px) 240px, 470px"
+        />
       ) : (
         <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900" />
       )}

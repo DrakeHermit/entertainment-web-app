@@ -1,13 +1,15 @@
 import SearchComponent from "@/components/SearchComponent";
 import RecommendedCard from "@/components/RecommendedCard";
 import Carousel from "@/components/Carousel";
+import { getTrending } from "@/lib/tmdb";
 
-export default function Home() {
+export default async function Home() {
+  const trending = await getTrending();
   return (
     <div>
       <SearchComponent />
       <h2 className="text-3xl font-medium text-white mb-300">Trending</h2>
-      <Carousel />
+      <Carousel trending={trending} />
       <h2 className="text-3xl font-medium text-white mb-400">
         Recommended for you
       </h2>

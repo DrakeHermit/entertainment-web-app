@@ -3,7 +3,7 @@
 import TrendingCard from "./TrendingCard";
 import { useCarousel } from "@/lib/hooks/useCarousel";
 
-const Carousel = () => {
+const Carousel = ({ trending }: { trending: any[] }) => {
   const {
     containerRef,
     trackRef,
@@ -23,41 +23,24 @@ const Carousel = () => {
       onPointerCancel={handlePointerCancel}
     >
       <div ref={trackRef} className="flex gap-4 md:gap-500 w-max">
-        <TrendingCard
-          title="The Dark Knight"
-          year={2008}
-          category="Movie"
-          rating="8.5"
-          thumbnail=""
-        />
-        <TrendingCard
-          title="Inception"
-          year={2010}
-          category="Movie"
-          rating="8.8"
-          thumbnail=""
-        />
-        <TrendingCard
-          title="Breaking Bad"
-          year={2008}
-          category="TV Series"
-          rating="9.5"
-          thumbnail=""
-        />
-        <TrendingCard
-          title="Interstellar"
-          year={2014}
-          category="Movie"
-          rating="8.6"
-          thumbnail=""
-        />
-        <TrendingCard
-          title="The Office"
-          year={2005}
-          category="TV Series"
-          rating="9.0"
-          thumbnail=""
-        />
+        {trending.map((item) => (
+          <TrendingCard
+            key={item.id}
+            title={item.title || item.name}
+            year={
+              item.release_date
+                ? new Date(item.release_date).getFullYear()
+                : new Date(item.first_air_date).getFullYear()
+            }
+            category={item.media_type === "movie" ? "Movie" : "TV Series"}
+            rating={Math.round(item.vote_average * 10) / 10 + ""}
+            thumbnail={
+              item.backdrop_path
+                ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
+                : undefined
+            }
+          />
+        ))}
       </div>
     </div>
   );
