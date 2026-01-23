@@ -2,8 +2,9 @@
 
 import TrendingCard from "./TrendingCard";
 import { useCarousel } from "@/lib/hooks/useCarousel";
+import { TrendingItem, getTitle, getReleaseYear } from "@/lib/types/types";
 
-const Carousel = ({ trending }: { trending: any[] }) => {
+const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
   const {
     containerRef,
     trackRef,
@@ -26,12 +27,8 @@ const Carousel = ({ trending }: { trending: any[] }) => {
         {trending.map((item) => (
           <TrendingCard
             key={item.id}
-            title={item.title || item.name}
-            year={
-              item.release_date
-                ? new Date(item.release_date).getFullYear()
-                : new Date(item.first_air_date).getFullYear()
-            }
+            title={getTitle(item)}
+            year={getReleaseYear(item)}
             category={item.media_type === "movie" ? "Movie" : "TV Series"}
             rating={Math.round(item.vote_average * 10) / 10 + ""}
             thumbnail={
