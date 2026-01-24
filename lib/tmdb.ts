@@ -11,7 +11,8 @@ const options = {
 export const getTrendingAll = async (): Promise<TrendingItem[]> => {
   const response = await fetch(
     "https://api.themoviedb.org/3/trending/all/week",
-    options
+    {...options,
+     next: { revalidate: 60 * 60 * 24 } }
   );
   const data: TrendingResponse = await response.json();
   return data.results;
@@ -20,7 +21,8 @@ export const getTrendingAll = async (): Promise<TrendingItem[]> => {
 export const getPopularMovies = async (): Promise<Movie[]> => {
   const response = await fetch(
     "https://api.themoviedb.org/3/movie/popular",
-    options
+    {...options,
+     next: { revalidate: 60 * 60 * 24 } }
   );
   const data: MovieResponse = await response.json();
   return data.results.map((movie) => ({ ...movie, media_type: "movie" as const }));
@@ -29,7 +31,8 @@ export const getPopularMovies = async (): Promise<Movie[]> => {
 export const getPopularTVSeries = async (): Promise<TVSeries[]> => {
   const response = await fetch(
     "https://api.themoviedb.org/3/tv/popular",
-    options
+    {...options,
+     next: { revalidate: 60 * 60 * 24 } }
   );
   const data: TVSeriesResponse = await response.json();
   return data.results.map((tv) => ({ ...tv, media_type: "tv" as const }));
@@ -52,7 +55,8 @@ export const getPopularAll = async (): Promise<TrendingItem[]> => {
 export const getTopRatedMovies = async (): Promise<Movie[]> => {
   const response = await fetch(
     "https://api.themoviedb.org/3/movie/top_rated",
-    options
+    {...options,
+     next: { revalidate: 60 * 60 * 24 } }
   );
   const data: MovieResponse = await response.json();
   return data.results.map((movie) => ({ ...movie, media_type: "movie" as const }));
@@ -61,7 +65,8 @@ export const getTopRatedMovies = async (): Promise<Movie[]> => {
 export const getTopRatedTVSeries = async (): Promise<TVSeries[]> => {
   const response = await fetch(
     "https://api.themoviedb.org/3/tv/top_rated",
-    options
+    {...options,
+     next: { revalidate: 60 * 60 * 24 } }
   );
   const data: TVSeriesResponse = await response.json();
   return data.results.map((tv) => ({ ...tv, media_type: "tv" as const }));
