@@ -48,3 +48,35 @@ export const getPopularAll = async (): Promise<TrendingItem[]> => {
   }
   return result;
 };
+
+export const getTopRatedMovies = async (): Promise<Movie[]> => {
+  const response = await fetch(
+    "https://api.themoviedb.org/3/movie/top_rated",
+    options
+  );
+  const data: MovieResponse = await response.json();
+  return data.results.map((movie) => ({ ...movie, media_type: "movie" as const }));
+};
+
+export const getTopRatedTVSeries = async (): Promise<TVSeries[]> => {
+  const response = await fetch(
+    "https://api.themoviedb.org/3/tv/top_rated",
+    options
+  );
+  const data: TVSeriesResponse = await response.json();
+  return data.results.map((tv) => ({ ...tv, media_type: "tv" as const }));
+};
+
+export const getTopRatedAll = async (): Promise<TrendingItem[]> => {
+  const [movies, tvSeries] = await Promise.all([
+    getTopRatedMovies(),
+    getTopRatedTVSeries(),
+  ]);
+  const result: TrendingItem[] = [];
+  const maxLength = Math.max(movies.length, tvSeries.length);
+  for (let i = 0; i < maxLength; i++) {
+    if (movies[i]) result.push(movies[i]);
+    if (tvSeries[i]) result.push(tvSeries[i]);
+  }
+  return result;
+};

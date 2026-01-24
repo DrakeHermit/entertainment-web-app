@@ -1,20 +1,21 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserCircle } from "lucide-react";
-import logo from "@/assets/logo.svg";
-import iconHome from "@/assets/icon-nav-home.svg";
-import iconMovies from "@/assets/icon-nav-movies.svg";
-import iconTv from "@/assets/icon-nav-tv-series.svg";
-import iconBookmark from "@/assets/icon-nav-bookmark.svg";
+import {
+  Logo,
+  IconHome,
+  IconMovies,
+  IconTvSeries,
+  IconBookmark,
+} from "./icons";
 
 const navItems = [
-  { href: "/", icon: iconHome, label: "Home" },
-  { href: "/movies", icon: iconMovies, label: "Movies" },
-  { href: "/tv-series", icon: iconTv, label: "TV Series" },
-  { href: "/bookmarks", icon: iconBookmark, label: "Bookmarks" },
+  { href: "/", Icon: IconHome, label: "Home" },
+  { href: "/movies", Icon: IconMovies, label: "Movies" },
+  { href: "/tv-series", Icon: IconTvSeries, label: "TV Series" },
+  { href: "/bookmarks", Icon: IconBookmark, label: "Bookmarks" },
 ];
 
 const NavBar = () => {
@@ -23,13 +24,7 @@ const NavBar = () => {
   return (
     <nav className="bg-semi-dark-blue flex justify-between lg:justify-start lg:flex-col items-center py-200 px-200 md:px-250 md:py-250 lg:px-350 lg:py-400 md:rounded-2xl lg:gap-900 h-fit lg:h-[calc(100vh-64px)] lg:fixed lg:left-8 lg:top-8">
       <Link href="/">
-        <Image
-          src={logo}
-          alt="Logo"
-          width={25}
-          height={20}
-          className="md:w-[33px] md:h-[27px]"
-        />
+        <Logo className="w-[25px] h-250 md:w-[33px] md:h-[27px] text-red" />
       </Link>
 
       <div className="flex lg:flex-col gap-4 md:gap-6 items-center">
@@ -39,17 +34,15 @@ const NavBar = () => {
             <Link
               key={item.href}
               href={item.href}
-              className={`transition-all hover:brightness-200 ${
-                isActive ? "brightness-200" : "opacity-60"
-              }`}
+              className="group"
               title={item.label}
             >
-              <Image
-                src={item.icon}
-                alt={item.label}
-                width={16}
-                height={16}
-                className="md:w-250 md:h-250"
+              <item.Icon
+                className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${
+                  isActive
+                    ? "text-white"
+                    : "text-[#5A698F] group-hover:text-red"
+                }`}
               />
             </Link>
           );
