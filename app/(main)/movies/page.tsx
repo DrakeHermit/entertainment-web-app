@@ -1,7 +1,25 @@
 import RecommendedSection from "@/components/RecommendedSection";
-import { getPopularMovies } from "@/lib/tmdb";
+import { getPopularMovies, searchMovies } from "@/lib/tmdb";
 
-const MoviesPage = async () => {
+type PageProps = {
+  searchParams: Promise<{ q?: string }>;
+};
+
+const MoviesPage = async ({ searchParams }: PageProps) => {
+  const { q } = await searchParams;
+
+  if (q) {
+    const searchResults = await searchMovies(q);
+    return (
+      <div>
+        <h2 className="text-3xl font-medium text-white mb-400">
+          Found {searchResults.length} movies for &apos;{q}&apos;
+        </h2>
+        <RecommendedSection recommended={searchResults} />
+      </div>
+    );
+  }
+
   const popular = await getPopularMovies();
 
   return (
@@ -11,4 +29,5 @@ const MoviesPage = async () => {
     </div>
   );
 };
+
 export default MoviesPage;

@@ -1,8 +1,26 @@
 import Carousel from "@/components/Carousel";
-import { getTopRatedAll, getPopularAll } from "@/lib/tmdb";
+import { getTopRatedAll, getPopularAll, searchMulti } from "@/lib/tmdb";
 import RecommendedSection from "@/components/RecommendedSection";
 
-export default async function Home() {
+type PageProps = {
+  searchParams: Promise<{ q?: string }>;
+};
+
+export default async function Home({ searchParams }: PageProps) {
+  const { q } = await searchParams;
+
+  if (q) {
+    const searchResults = await searchMulti(q);
+    return (
+      <div>
+        <h2 className="text-3xl font-medium text-white mb-400">
+          Found {searchResults.length} results for &apos;{q}&apos;
+        </h2>
+        <RecommendedSection recommended={searchResults} />
+      </div>
+    );
+  }
+
   const [topRated, popular] = await Promise.all([
     getTopRatedAll(),
     getPopularAll(),

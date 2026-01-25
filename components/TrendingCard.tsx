@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Film, Tv } from "lucide-react";
-import bookmarkIcon from "@/assets/icon-bookmark-empty.svg";
+import { IconBookmarkEmpty } from "@/components/Icons";
 
 interface TrendingCardProps {
   title: string;
@@ -8,6 +8,7 @@ interface TrendingCardProps {
   category: "Movie" | "TV Series";
   rating: string;
   thumbnail?: string;
+  priority?: boolean;
 }
 
 const TrendingCard = ({
@@ -16,6 +17,7 @@ const TrendingCard = ({
   category,
   rating,
   thumbnail,
+  priority = false,
 }: TrendingCardProps) => {
   const CategoryIcon = category === "Movie" ? Film : Tv;
 
@@ -26,8 +28,9 @@ const TrendingCard = ({
           src={thumbnail}
           alt={title}
           fill
-          className="object-fit"
+          className="object-cover"
           sizes="(max-width: 768px) 240px, 470px"
+          priority={priority}
         />
       ) : (
         <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900" />
@@ -36,13 +39,7 @@ const TrendingCard = ({
       <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
 
       <button className="absolute top-2 right-2 md:top-4 md:right-4 w-9 h-9 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer">
-        <Image
-          src={bookmarkIcon}
-          alt="Bookmark"
-          width={14}
-          height={14}
-          className="group-hover/btn:brightness-0"
-        />
+        <IconBookmarkEmpty className="w-3 h-3.5 text-white group-hover/btn:text-black" />
       </button>
 
       <div className="absolute bottom-4 left-4 text-white z-10">

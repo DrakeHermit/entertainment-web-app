@@ -9,7 +9,7 @@ import {
   IconMovies,
   IconTvSeries,
   IconBookmark,
-} from "./icons";
+} from "@/components/Icons";
 
 const navItems = [
   { href: "/", Icon: IconHome, label: "Home" },

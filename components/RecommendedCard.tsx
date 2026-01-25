@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Film, Tv } from "lucide-react";
-import bookmarkIcon from "@/assets/icon-bookmark-empty.svg";
+import { IconBookmarkEmpty } from "@/components/Icons";
 
 interface RecommendedCardProps {
   title: string;
@@ -23,19 +23,19 @@ const RecommendedCard = ({
     <div className="group cursor-pointer">
       <div className="relative aspect-video rounded-lg overflow-hidden mb-2">
         {thumbnail ? (
-          <Image src={thumbnail} alt={title} fill className="object-cover" />
+          <Image
+            src={thumbnail}
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+          />
         ) : (
           <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900" />
         )}
 
-        <button className="absolute top-6 right-6 w-8 h-8 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer">
-          <Image
-            src={bookmarkIcon}
-            alt="Bookmark"
-            width={12}
-            height={14}
-            className="group-hover/btn:brightness-0"
-          />
+        <button className="absolute top-2 right-2 w-8 h-8 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer">
+          <IconBookmarkEmpty className="w-3 h-3.5 text-white group-hover/btn:text-black" />
         </button>
 
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">

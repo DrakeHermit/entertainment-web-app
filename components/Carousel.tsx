@@ -24,7 +24,7 @@ const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
       onPointerCancel={handlePointerCancel}
     >
       <div ref={trackRef} className="flex gap-4 md:gap-500 w-max">
-        {trending.map((item) => (
+        {trending.map((item, index) => (
           <TrendingCard
             key={item.id}
             title={getTitle(item)}
@@ -36,6 +36,7 @@ const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
                 ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
                 : undefined
             }
+            priority={index === 0}
           />
         ))}
       </div>
