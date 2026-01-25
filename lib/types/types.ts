@@ -49,12 +49,3 @@ export interface TVSeriesResponse {
   total_pages: number;
   total_results: number;
 }
-
-export function getTitle(item: TrendingItem): string {
-  return item.media_type === "movie" ? item.title : item.name;
-}
-
-export function getReleaseYear(item: TrendingItem): number {
-  const date = item.media_type === "movie" ? item.release_date : item.first_air_date;
-  return date ? new Date(date).getFullYear() : 0;
-}

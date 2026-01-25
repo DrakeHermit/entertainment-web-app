@@ -1,10 +1,11 @@
-import { TrendingItem, getTitle, getReleaseYear } from "@/lib/types/types";
+import { TrendingItem } from "@/lib/types/types";
+import { getTitle, getReleaseYear } from "@/lib/helpers";
 import RecommendedCard from "./RecommendedCard";
 
 const RecommendedSection = ({ recommended }: { recommended: TrendingItem[] }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-      {recommended.map((item) => (
+      {recommended.map((item, index) => (
         <RecommendedCard
           key={item.id}
           title={getTitle(item)}
@@ -16,6 +17,7 @@ const RecommendedSection = ({ recommended }: { recommended: TrendingItem[] }) =>
               ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
               : undefined
           }
+          priority={index === 0}
         />
       ))}
     </div>

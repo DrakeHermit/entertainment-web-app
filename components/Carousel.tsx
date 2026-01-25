@@ -2,7 +2,8 @@
 
 import TrendingCard from "./TrendingCard";
 import { useCarousel } from "@/lib/hooks/useCarousel";
-import { TrendingItem, getTitle, getReleaseYear } from "@/lib/types/types";
+import { TrendingItem } from "@/lib/types/types";
+import { getTitle, getReleaseYear } from "@/lib/helpers";
 
 const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
   const {

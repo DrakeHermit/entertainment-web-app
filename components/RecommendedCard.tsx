@@ -8,6 +8,7 @@ interface RecommendedCardProps {
   category: "Movie" | "TV Series";
   rating: string;
   thumbnail?: string;
+  priority?: boolean;
 }
 
 const RecommendedCard = ({
@@ -16,6 +17,7 @@ const RecommendedCard = ({
   category,
   rating,
   thumbnail,
+  priority = false,
 }: RecommendedCardProps) => {
   const CategoryIcon = category === "Movie" ? Film : Tv;
 
@@ -29,6 +31,7 @@ const RecommendedCard = ({
             fill
             className="object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+            priority={priority}
           />
         ) : (
           <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900" />

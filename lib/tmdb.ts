@@ -1,14 +1,5 @@
-import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse, getTitle, getReleaseYear } from "./types/types";
-
-const isValidResult = (item: TrendingItem): boolean => {
-  const title = getTitle(item);
-  const year = getReleaseYear(item);
-  return !!(
-    item.backdrop_path &&
-    title.length > 3 &&
-    year > 0
-  );
-};
+import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse } from "./types/types";
+import { isValidResult } from "./helpers";
 
 const options = {
   method: "GET",
