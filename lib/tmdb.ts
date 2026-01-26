@@ -1,4 +1,4 @@
-import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse } from "./types/types";
+import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse, MovieDetails, TVSeriesDetails } from "./types/types";
 import { isValidResult } from "./helpers";
 
 const options = {
@@ -118,4 +118,22 @@ export const searchTVSeries = async (query: string): Promise<TVSeries[]> => {
   return data.results
     .map((tv) => ({ ...tv, media_type: "tv" as const }))
     .filter(isValidResult);
+};
+
+export const getMovieDetails = async (id: number): Promise<MovieDetails | null> => {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/movie/${id}`,
+    { ...options, next: { revalidate: 60 * 60 * 24 } }
+  );
+  if (!response.ok) return null;
+  return response.json();
+};
+
+export const getTVSeriesDetails = async (id: number): Promise<TVSeriesDetails | null> => {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/tv/${id}`,
+    { ...options, next: { revalidate: 60 * 60 * 24 } }
+  );
+  if (!response.ok) return null;
+  return response.json();
 };

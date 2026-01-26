@@ -1,8 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Film, Tv } from "lucide-react";
 import { IconBookmarkEmpty } from "@/components/Icons";
 
 interface RecommendedCardProps {
+  id: number;
   title: string;
   year: number;
   category: "Movie" | "TV Series";
@@ -12,6 +14,7 @@ interface RecommendedCardProps {
 }
 
 const RecommendedCard = ({
+  id,
   title,
   year,
   category,
@@ -20,9 +23,10 @@ const RecommendedCard = ({
   priority = false,
 }: RecommendedCardProps) => {
   const CategoryIcon = category === "Movie" ? Film : Tv;
+  const href = category === "Movie" ? `/movie/${id}` : `/tv/${id}`;
 
   return (
-    <div className="group cursor-pointer">
+    <Link href={href} className="group cursor-pointer block">
       <div className="relative aspect-video rounded-lg overflow-hidden mb-2">
         {thumbnail ? (
           <Image
@@ -62,7 +66,7 @@ const RecommendedCard = ({
         </div>
         <h3 className="text-sm md:text-lg font-medium">{title}</h3>
       </div>
-    </div>
+    </Link>
   );
 };
 

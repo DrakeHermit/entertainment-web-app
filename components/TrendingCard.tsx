@@ -1,8 +1,13 @@
+"use client";
+
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Film, Tv } from "lucide-react";
 import { IconBookmarkEmpty } from "@/components/Icons";
 
 interface TrendingCardProps {
+  id: number;
   title: string;
   year: number;
   category: "Movie" | "TV Series";
@@ -12,6 +17,7 @@ interface TrendingCardProps {
 }
 
 const TrendingCard = ({
+  id,
   title,
   year,
   category,
@@ -19,10 +25,30 @@ const TrendingCard = ({
   thumbnail,
   priority = false,
 }: TrendingCardProps) => {
+  const router = useRouter();
+  const startPos = useRef({ x: 0, y: 0 });
   const CategoryIcon = category === "Movie" ? Film : Tv;
+  const href = category === "Movie" ? `/movie/${id}` : `/tv/${id}`;
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    startPos.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    const dx = Math.abs(e.clientX - startPos.current.x);
+    const dy = Math.abs(e.clientY - startPos.current.y);
+
+    if (dx < 5 && dy < 5) {
+      router.push(href);
+    }
+  };
 
   return (
-    <div className="relative min-w-[240px] md:min-w-[470px] h-[140px] md:h-[230px] rounded-lg overflow-hidden group cursor-pointer mb-500">
+    <div
+      className="relative min-w-[240px] md:min-w-[470px] h-[140px] md:h-[230px] rounded-lg overflow-hidden group cursor-pointer mb-500"
+      onMouseDown={handleMouseDown}
+      onClick={handleClick}
+    >
       {thumbnail ? (
         <Image
           src={thumbnail}

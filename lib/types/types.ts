@@ -49,3 +49,67 @@ export interface TVSeriesResponse {
   total_pages: number;
   total_results: number;
 }
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface ProductionCompany {
+  id: number;
+  logo_path: string | null;
+  name: string;
+  origin_country: string;
+}
+
+export interface MovieDetails {
+  adult: boolean;
+  backdrop_path: string | null;
+  budget: number;
+  genres: Genre[];
+  homepage: string | null;
+  id: number;
+  imdb_id: string | null;
+  original_language: string;
+  original_title: string;
+  overview: string;
+  popularity: number;
+  poster_path: string | null;
+  production_companies: ProductionCompany[];
+  release_date: string;
+  revenue: number;
+  runtime: number | null;
+  status: string;
+  tagline: string | null;
+  title: string;
+  vote_average: number;
+  vote_count: number;
+}
+
+export interface TVSeriesDetails {
+  adult: boolean;
+  backdrop_path: string | null;
+  created_by: { id: number; name: string }[];
+  episode_run_time: number[];
+  first_air_date: string;
+  genres: Genre[];
+  homepage: string | null;
+  id: number;
+  in_production: boolean;
+  languages: string[];
+  last_air_date: string;
+  name: string;
+  number_of_episodes: number;
+  number_of_seasons: number;
+  origin_country: string[];
+  original_language: string;
+  original_name: string;
+  overview: string;
+  popularity: number;
+  poster_path: string | null;
+  production_companies: ProductionCompany[];
+  status: string;
+  tagline: string | null;
+  vote_average: number;
+  vote_count: number;
+}

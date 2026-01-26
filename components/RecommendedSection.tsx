@@ -8,6 +8,7 @@ const RecommendedSection = ({ recommended }: { recommended: TrendingItem[] }) =>
       {recommended.map((item, index) => (
         <RecommendedCard
           key={item.id}
+          id={item.id}
           title={getTitle(item)}
           year={getReleaseYear(item)}
           category={item.media_type === "movie" ? "Movie" : "TV Series"}

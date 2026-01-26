@@ -28,6 +28,7 @@ const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
         {trending.map((item, index) => (
           <TrendingCard
             key={item.id}
+            id={item.id}
             title={getTitle(item)}
             year={getReleaseYear(item)}
             category={item.media_type === "movie" ? "Movie" : "TV Series"}
