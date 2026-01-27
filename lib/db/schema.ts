@@ -6,4 +6,5 @@ export const users = pgTable("users", {
     password: text().notNull(),
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull().defaultNow(),
+    jwt_token: text(),
 });
