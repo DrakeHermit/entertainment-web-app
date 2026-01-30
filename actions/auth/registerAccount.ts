@@ -1,13 +1,12 @@
 "use server";
 
+import { genarateToken } from "@/lib/auth/genarateToken";
 import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import bcrypt from "bcrypt";
-
-type ActionState = {
-  error: string | null;
-  success?: boolean;
-};
+import { eq } from "drizzle-orm";
+import { cookies } from "next/headers";
+import { ActionState } from "@/lib/types/types";
 
 export async function registerAccount(
   prevState: ActionState,
@@ -19,14 +18,33 @@ export async function registerAccount(
   if (!email || !password) {
     return { error: "Email and password are required" };
   }
+  
+  const userExists = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (userExists[0]) {
+    return { error: "User already exists", success: false };
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
+  
   try {
-    await db.insert(users).values({
+    const user = await db.insert(users).values({
       email,
       password: hashedPassword,
+    }).returning();
+
+    const token = genarateToken(user[0].id.toString());
+    
+    await db.update(users).set({ jwt_token: token }).where(eq(users.id, user[0].id));
+
+    const cookieStore = await cookies();
+    cookieStore.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
+      path: "/",
     });
+    
     return { error: null, success: true };
   } catch (error) {
     console.error(error);

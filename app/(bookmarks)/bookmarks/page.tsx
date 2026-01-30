@@ -1,8 +1,18 @@
 import Link from "next/link";
 import { IconBookmarkEmpty } from "@/components/Icons";
+import { getSessionUser } from "@/lib/auth/checkSessionValid";
+import LogoutButton from "@/components/LogoutButton";
 
-const BookmarksPage = () => {
-  return (
+const BookmarksPage = async () => {
+  const sessionUser = await getSessionUser();
+  return sessionUser ? (
+    <div className="flex flex-col mt-400">
+      <h2 className="text-3xl font-medium text-white mb-400">
+        Bookmarked Movies & TV Series
+      </h2>
+      <LogoutButton />
+    </div>
+  ) : (
     <div>
       <h2 className="text-3xl font-medium text-white mb-400 mt-400">
         Bookmarked Movies & TV Series
@@ -38,7 +48,7 @@ const BookmarksPage = () => {
             href="/login"
             className="text-white/75 hover:text-white underline text-[15px] transition-colors"
           >
-            Sign in to existing account
+            Sign in to an existing account
           </Link>
         </div>
       </div>

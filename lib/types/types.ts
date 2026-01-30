@@ -113,3 +113,8 @@ export interface TVSeriesDetails {
   vote_average: number;
   vote_count: number;
 }
+
+export type ActionState = {
+  error: string | null;
+  success?: boolean;
+};
