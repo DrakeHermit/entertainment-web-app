@@ -40,9 +40,10 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
           <Image
             src={`https://image.tmdb.org/t/p/original${tvSeries.backdrop_path}`}
             alt={tvSeries.name}
-            fill
             className="object-cover"
             priority
+            width={1000}
+            height={1000}
           />
         ) : (
           <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900" />
@@ -78,8 +79,9 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
               <Image
                 src={`https://image.tmdb.org/t/p/w500${tvSeries.poster_path}`}
                 alt={tvSeries.name}
-                fill
                 className="object-cover"
+                width={1000}
+                height={1000}
               />
             ) : (
               <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900 flex items-center justify-center">

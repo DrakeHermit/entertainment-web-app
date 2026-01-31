@@ -1,7 +1,14 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Film, Star, Clock, Calendar, DollarSign } from "lucide-react";
+import {
+  ArrowLeft,
+  Film,
+  Star,
+  Clock,
+  Calendar,
+  DollarSign,
+} from "lucide-react";
 import { getMovieDetails } from "@/lib/tmdb";
 
 type PageProps = {
@@ -49,7 +56,8 @@ export default async function MovieDetailsPage({ params }: PageProps) {
           <Image
             src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
             alt={movie.title}
-            fill
+            width={1000}
+            height={1000}
             className="object-cover"
             priority
           />
@@ -81,7 +89,8 @@ export default async function MovieDetailsPage({ params }: PageProps) {
               <Image
                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                 alt={movie.title}
-                fill
+                width={1000}
+                height={1000}
                 className="object-cover"
               />
             ) : (
