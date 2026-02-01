@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 
 const SearchInput = ({ pathname }: { pathname: string }) => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [search, setSearch] = useState("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,7 +19,9 @@ const SearchInput = ({ pathname }: { pathname: string }) => {
 
     timeoutRef.current = setTimeout(() => {
       if (value) {
-        router.push(`${pathname}?q=${encodeURIComponent(value)}`, { scroll: false });
+        router.push(`${pathname}?q=${encodeURIComponent(value)}`, {
+          scroll: false,
+        });
       } else {
         router.push(pathname, { scroll: false });
       }

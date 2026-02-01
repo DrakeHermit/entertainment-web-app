@@ -1,41 +1,38 @@
 import Carousel from "@/components/Carousel";
-import { getTopRatedAll, getPopularAll, searchMulti } from "@/lib/tmdb";
+import { getTopRatedAll, getPopularAll } from "@/lib/tmdb";
 import RecommendedSection from "@/components/RecommendedSection";
+import { Suspense } from "react";
+import CarouselSkeleton from "@/components/CarouselSkeleton";
+import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
+import HomeContent from "@/components/HomeContent";
 
-type PageProps = {
-  searchParams: Promise<{ q?: string }>;
-};
+async function TopRatedCarousel() {
+  const topRated = await getTopRatedAll();
+  return <Carousel trending={topRated} />;
+}
 
-export default async function Home({ searchParams }: PageProps) {
-  const { q } = await searchParams;
+async function RecommendedBlock() {
+  const popular = await getPopularAll();
+  return <RecommendedSection recommended={popular} />;
+}
 
-  if (q) {
-    const searchResults = await searchMulti(q);
-    return (
-      <div>
-        <h2 className="text-3xl font-medium text-white mb-400">
-          Found {searchResults.length} results for &apos;{q}&apos;
-        </h2>
-        <RecommendedSection recommended={searchResults} />
-      </div>
-    );
-  }
-
-  const [topRated, popular] = await Promise.all([
-    getTopRatedAll(),
-    getPopularAll(),
-  ]);
-
+export default function Home() {
   return (
-    <div>
-      <h2 className="text-3xl font-medium text-white mb-300">
-        All time top rated
-      </h2>
-      <Carousel trending={topRated} />
-      <h2 className="text-3xl font-medium text-white mb-400">
-        Recommended for you
-      </h2>
-      <RecommendedSection recommended={popular} />
-    </div>
+    <HomeContent>
+      <div>
+        <h2 className="text-3xl font-medium text-white mb-300">
+          All time top rated
+        </h2>
+        <Suspense fallback={<CarouselSkeleton />}>
+          <TopRatedCarousel />
+        </Suspense>
+        <h2 className="text-3xl font-medium text-white mb-400">
+          Recommended for you
+        </h2>
+        <Suspense fallback={<RecommendedSectionSkeleton />}>
+          <RecommendedBlock />
+        </Suspense>
+      </div>
+    </HomeContent>
   );
 }

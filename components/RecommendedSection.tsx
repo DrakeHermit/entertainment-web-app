@@ -18,7 +18,7 @@ const RecommendedSection = ({ recommended }: { recommended: TrendingItem[] }) =>
               ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
               : undefined
           }
-          priority={index === 0}
+          priority={false}
         />
       ))}
     </div>
