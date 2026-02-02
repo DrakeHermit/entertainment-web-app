@@ -10,6 +10,7 @@ const RegisterPage = () => {
   });
   const [clientError, setClientError] = useState<string | null>(null);
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -28,6 +29,7 @@ const RegisterPage = () => {
 
     formAction(formData);
     setEmail("");
+    setUsername("");
     setPassword("");
     setConfirmPassword("");
     console.log("Account logged in successfully");
@@ -49,6 +51,16 @@ const RegisterPage = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors focus:ring-0"
+          />
+        </div>
+        <div className="relative">
+          <input
+            type="text"
+            name="username"
+            placeholder="Username (optional)"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors"
           />
         </div>
         <div className="relative">

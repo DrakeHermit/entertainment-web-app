@@ -13,6 +13,7 @@ export async function registerAccount(
   formData: FormData
 ): Promise<ActionState> {
   const email = formData.get("email") as string;
+  const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
   if (!email || !password) {
@@ -29,6 +30,7 @@ export async function registerAccount(
   try {
     const user = await db.insert(users).values({
       email,
+      username: username || null,
       password: hashedPassword,
     }).returning();
 

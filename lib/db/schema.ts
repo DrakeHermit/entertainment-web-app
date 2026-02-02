@@ -3,7 +3,9 @@ import { integer, text, timestamp, pgTable, real } from "drizzle-orm/pg-core";
 export const users = pgTable("users", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
     email: text().notNull().unique(),
+    username: text(),
     password: text().notNull(),
+    avatar_url: text(),
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull().defaultNow(),
     jwt_token: text(),

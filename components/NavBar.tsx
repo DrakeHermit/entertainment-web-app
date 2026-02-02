@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserCircle } from "lucide-react";
 import {
   Logo,
   IconHome,
@@ -10,6 +9,7 @@ import {
   IconTvSeries,
   IconBookmark,
 } from "@/components/Icons";
+import UserAvatar from "@/components/UserAvatar";
 
 const navItems = [
   { href: "/", Icon: IconHome, label: "Home" },
@@ -18,7 +18,18 @@ const navItems = [
   { href: "/bookmarks", Icon: IconBookmark, label: "Bookmarks" },
 ];
 
-const NavBar = () => {
+type User = {
+  id: number;
+  email: string;
+  username: string | null;
+  avatar_url: string | null;
+};
+
+type NavBarProps = {
+  user?: User | null;
+};
+
+const NavBar = ({ user }: NavBarProps) => {
   const pathname = usePathname();
 
   return (
@@ -49,16 +60,22 @@ const NavBar = () => {
         })}
       </div>
 
-      <Link
-        href="/register"
-        className="lg:mt-auto opacity-60 hover:opacity-100 transition-opacity"
-        title="Login/Register"
-      >
-        <UserCircle
-          className="w-6 h-6 md:w-7 md:h-7 text-white"
-          strokeWidth={1.5}
-        />
-      </Link>
+      {user ? (
+        <button
+          className="lg:mt-auto opacity-60 hover:opacity-100 transition-opacity"
+          title={user.username || user.email}
+        >
+          <UserAvatar user={user} />
+        </button>
+      ) : (
+        <Link
+          href="/register"
+          className="lg:mt-auto opacity-60 hover:opacity-100 transition-opacity"
+          title="Login/Register"
+        >
+          <UserAvatar user={null} />
+        </Link>
+      )}
     </nav>
   );
 };
