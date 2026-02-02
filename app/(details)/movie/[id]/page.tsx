@@ -56,8 +56,8 @@ export default async function MovieDetailsPage({ params }: PageProps) {
           <Image
             src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
             alt={movie.title}
-            width={1000}
-            height={1000}
+            fill
+            sizes="100vw"
             className="object-cover"
             priority
           />
@@ -89,8 +89,8 @@ export default async function MovieDetailsPage({ params }: PageProps) {
               <Image
                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
                 alt={movie.title}
-                width={1000}
-                height={1000}
+                fill
+                sizes="300px"
                 className="object-cover"
               />
             ) : (
