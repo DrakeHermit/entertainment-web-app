@@ -39,13 +39,13 @@ export const useUserMenu = () => {
           left: rect.left,
         });
       } else {
-        const centerLeft = rect.left + rect.width / 2 - menuWidth / 2;
-        const maxLeft = window.innerWidth - menuWidth - 16;
-        const finalLeft = Math.min(Math.max(16, centerLeft), maxLeft);
+        const idealMenuLeft = rect.left + rect.width / 2 - menuWidth / 2;
+        const maxMenuLeft = window.innerWidth - menuWidth - 16;
+        const clampedMenuLeft = Math.min(Math.max(16, idealMenuLeft), maxMenuLeft);
         
         setMenuPosition({
           top: rect.bottom + 12, 
-          left: finalLeft,
+          left: clampedMenuLeft,
         });
       }
       

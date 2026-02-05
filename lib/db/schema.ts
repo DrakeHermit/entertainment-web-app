@@ -12,17 +12,33 @@ export const users = pgTable("users", {
 });
 
 export const movies = pgTable('movies', {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    title: text().notNull(),
-    backdrop_path: text().notNull(),
-    release_date: timestamp().notNull(),
-    rating: real().notNull(),
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  tmdb_id: integer().notNull().unique(), 
+  title: text().notNull(),
+  backdrop_path: text().notNull(),
+  release_date: timestamp().notNull(),
+  rating: real().notNull(),
 });
 
-export const tvSeries = pgTable('tvSeries', {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    name: text().notNull(),
-    backdrop_path: text().notNull(),
-    first_air_date: timestamp().notNull(),
-    rating: real().notNull(),
+export const tvSeries = pgTable('tv_series', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  tmdb_id: integer().notNull().unique(),
+  name: text().notNull(),
+  backdrop_path: text().notNull(),
+  first_air_date: timestamp().notNull(),
+  rating: real().notNull(),
+});
+
+export const bookmarkedMovies = pgTable('bookmarked_movies', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  movie_id: integer().notNull().references(() => movies.id, { onDelete: 'cascade' }),
+  bookmarked_at: timestamp().notNull().defaultNow(),
+});
+
+export const bookmarkedTvSeries = pgTable('bookmarked_tv_series', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  series_id: integer().notNull().references(() => tvSeries.id, { onDelete: 'cascade' }),
+  bookmarked_at: timestamp().notNull().defaultNow(),
 });
