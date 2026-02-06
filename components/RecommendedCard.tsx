@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Film, Tv } from "lucide-react";
 import { IconBookmarkEmpty } from "@/components/Icons";
+import { addBookmark } from "@/actions/post/addBookmark";
 
 interface RecommendedCardProps {
   id: number;
@@ -11,6 +14,7 @@ interface RecommendedCardProps {
   rating: string;
   thumbnail?: string;
   priority?: boolean;
+  userId?: number;
 }
 
 const RecommendedCard = ({
@@ -21,9 +25,20 @@ const RecommendedCard = ({
   rating,
   thumbnail,
   priority = false,
+  userId,
 }: RecommendedCardProps) => {
   const CategoryIcon = category === "Movie" ? Film : Tv;
   const href = category === "Movie" ? `/movie/${id}` : `/tv/${id}`;
+
+  const handleAddBookmark = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!userId) {
+      console.error("User not authenticated");
+      return;
+    }
+    await addBookmark(userId, { id, title, year, category, rating, thumbnail });
+  };
 
   return (
     <Link href={href} className="group cursor-pointer block">
@@ -41,7 +56,11 @@ const RecommendedCard = ({
           <div className="absolute inset-0 bg-linear-to-br from-slate-700 to-slate-900" />
         )}
 
-        <button className="absolute top-2 right-2 w-8 h-8 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer">
+        <button
+          className="absolute top-2 right-2 w-8 h-8 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer"
+          onClick={handleAddBookmark}
+          disabled={!userId}
+        >
           <IconBookmarkEmpty className="w-3 h-3.5 text-white group-hover/btn:text-black" />
         </button>
 

@@ -5,7 +5,7 @@ import { useCarousel } from "@/lib/hooks/useCarousel";
 import { TrendingItem } from "@/lib/types/types";
 import { getTitle, getReleaseYear } from "@/lib/helpers";
 
-const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
+const Carousel = ({ trending, userId }: { trending: TrendingItem[]; userId?: number }) => {
   const {
     containerRef,
     trackRef,
@@ -39,6 +39,7 @@ const Carousel = ({ trending }: { trending: TrendingItem[] }) => {
                 : undefined
             }
             priority={false}
+            userId={userId}
           />
         ))}
       </div>

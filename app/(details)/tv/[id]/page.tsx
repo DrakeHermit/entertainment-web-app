@@ -10,6 +10,8 @@ import {
   Film as FilmIcon,
 } from "lucide-react";
 import { getTVSeriesDetails } from "@/lib/tmdb";
+import { getUserId } from "@/lib/server-helpers";
+import BookmarkButton from "@/components/BookmarkButton";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -22,6 +24,9 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
   if (!tvSeries) {
     notFound();
   }
+
+  const userIdData = await getUserId();
+  const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
 
   return (
     <div className="pb-8">
@@ -92,7 +97,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
         </div>
 
         <div className="space-y-6">
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-4 items-center">
             <div className="flex items-center gap-2 bg-semi-dark-blue px-4 py-2 rounded-lg">
               <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
               <span className="text-white font-semibold">
@@ -116,6 +121,15 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
                 {tvSeries.number_of_episodes !== 1 ? "s" : ""}
               </span>
             </div>
+            <BookmarkButton
+              id={tvSeries.id}
+              title={tvSeries.name}
+              year={new Date(tvSeries.first_air_date).getFullYear()}
+              category="TV Series"
+              rating={tvSeries.vote_average.toFixed(1)}
+              thumbnail={tvSeries.backdrop_path ? `https://image.tmdb.org/t/p/w500${tvSeries.backdrop_path}` : undefined}
+              userId={userId}
+            />
           </div>
 
           {tvSeries.genres.length > 0 && (

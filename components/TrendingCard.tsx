@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Film, Tv } from "lucide-react";
 import { IconBookmarkEmpty } from "@/components/Icons";
+import { addBookmark } from "@/actions/post/addBookmark";
 
 interface TrendingCardProps {
   id: number;
@@ -14,6 +15,7 @@ interface TrendingCardProps {
   rating: string;
   thumbnail?: string;
   priority?: boolean;
+  userId?: number;
 }
 
 const TrendingCard = ({
@@ -24,6 +26,7 @@ const TrendingCard = ({
   rating,
   thumbnail,
   priority = false,
+  userId,
 }: TrendingCardProps) => {
   const router = useRouter();
   const startPos = useRef({ x: 0, y: 0 });
@@ -41,6 +44,15 @@ const TrendingCard = ({
     if (dx < 5 && dy < 5) {
       router.push(href);
     }
+  };
+
+  const handleAddBookmark = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking bookmark
+    if (!userId) {
+      console.error("User not authenticated");
+      return;
+    }
+    await addBookmark(userId, { id, title, year, category, rating, thumbnail });
   };
 
   return (
@@ -64,7 +76,11 @@ const TrendingCard = ({
 
       <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
 
-      <button className="absolute top-2 right-2 md:top-4 md:right-4 w-9 h-9 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer">
+      <button
+        className="absolute top-2 right-2 md:top-4 md:right-4 w-9 h-9 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer"
+        onClick={handleAddBookmark}
+        disabled={!userId}
+      >
         <IconBookmarkEmpty className="w-3 h-3.5 text-white group-hover/btn:text-black" />
       </button>
 

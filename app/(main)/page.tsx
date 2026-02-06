@@ -5,16 +5,20 @@ import { Suspense } from "react";
 import CarouselSkeleton from "@/components/CarouselSkeleton";
 import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
 import HomeContent from "@/components/HomeContent";
+import { getUserId } from "@/lib/server-helpers";
 
-async function TopRatedCarousel() {
+async function TopRatedCarousel({ userId }: { userId?: number }) {
   const topRated = await getTopRatedAll();
-  return <Carousel trending={topRated} />;
+  return <Carousel trending={topRated} userId={userId} />;
 }
 
-async function RecommendedBlock() {
+async function RecommendedBlock({ userId }: { userId?: number }) {
   const popular = await getPopularAll();
-  return <RecommendedSection recommended={popular} />;
+  return <RecommendedSection recommended={popular} userId={userId} />;
 }
+
+const userIdData = await getUserId();
+const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
 
 export default function Home() {
   return (
@@ -24,13 +28,13 @@ export default function Home() {
           All time top rated
         </h2>
         <Suspense fallback={<CarouselSkeleton />}>
-          <TopRatedCarousel />
+          <TopRatedCarousel userId={userId} />
         </Suspense>
         <h2 className="text-3xl font-medium text-white mb-400">
           Recommended for you
         </h2>
         <Suspense fallback={<RecommendedSectionSkeleton />}>
-          <RecommendedBlock />
+          <RecommendedBlock userId={userId} />
         </Suspense>
       </div>
     </HomeContent>

@@ -118,3 +118,12 @@ export type ActionState = {
   error: string | null;
   success?: boolean;
 };
+
+export interface AddBookmarkProps {
+  id: number;
+  title: string;
+  year: number;
+  category: "Movie" | "TV Series";
+  rating: string;
+  thumbnail?: string;
+}
