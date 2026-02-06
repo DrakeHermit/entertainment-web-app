@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { loginAccount } from "@/actions/auth/loginAccount";
 import { useActionState, useState } from "react";
+import { redirect } from "next/navigation";
 
 const LoginPage = () => {
   const [state, formAction, isPending] = useActionState(loginAccount, {
@@ -34,6 +35,10 @@ const LoginPage = () => {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
   };
+
+  if (state.success) {
+    redirect("/");
+  }
 
   return (
     <div className="w-full max-w-[400px] bg-semi-dark-blue rounded-2xl p-8">

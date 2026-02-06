@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { registerAccount } from "@/actions/auth/registerAccount";
 import { useActionState, useState } from "react";
+import { redirect } from "next/navigation";
 
 const RegisterPage = () => {
   const [state, formAction, isPending] = useActionState(registerAccount, {
@@ -32,8 +33,11 @@ const RegisterPage = () => {
     setUsername("");
     setPassword("");
     setConfirmPassword("");
-    console.log("Account logged in successfully");
   };
+
+  if (state.success) {
+    redirect("/");
+  }
 
   const error = clientError || state.error;
 

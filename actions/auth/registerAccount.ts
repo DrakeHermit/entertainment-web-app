@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 import { ActionState } from "@/lib/types/types";
 
 export async function registerAccount(
-  prevState: ActionState,
+  _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   const email = formData.get("email") as string;

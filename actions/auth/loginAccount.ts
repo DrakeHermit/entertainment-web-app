@@ -43,6 +43,5 @@ export async function loginAccount(
     path: "/",
   });
 
-  console.log("User logged in:", email);
-  redirect("/");
+  return { error: null, success: true };
 }

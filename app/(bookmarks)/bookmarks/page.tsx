@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { IconBookmarkEmpty } from "@/components/Icons";
 import { getSessionUser } from "@/lib/auth/checkSessionValid";
-import LogoutButton from "@/components/LogoutButton";
 
 const BookmarksPage = async () => {
   const sessionUser = await getSessionUser();
@@ -10,7 +9,6 @@ const BookmarksPage = async () => {
       <h2 className="text-3xl font-medium text-white mb-400">
         Bookmarked Movies & TV Series
       </h2>
-      <LogoutButton />
     </div>
   ) : (
     <div>
