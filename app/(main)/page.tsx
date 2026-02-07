@@ -22,7 +22,7 @@ const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId
 
 export default function Home() {
   return (
-    <HomeContent>
+    <HomeContent userId={userId}>
       <div>
         <h2 className="text-3xl font-medium text-white mb-300">
           All time top rated

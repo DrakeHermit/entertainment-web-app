@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Film, Tv } from "lucide-react";
-import { IconBookmarkEmpty } from "@/components/Icons";
+import { IconBookmarkEmpty, IconBookmark } from "@/components/Icons";
 import { addBookmark } from "@/actions/post/addBookmark";
+import { removeBookmark } from "@/actions/post/removeBookmark";
+import { useBookmarks } from "@/contexts/BookmarkContext";
 
 interface RecommendedCardProps {
   id: number;
@@ -27,17 +30,38 @@ const RecommendedCard = ({
   priority = false,
   userId,
 }: RecommendedCardProps) => {
+  const { isBookmarked, addBookmarkToContext, removeBookmarkFromContext } = useBookmarks();
+  const [isLoading, setIsLoading] = useState(false);
   const CategoryIcon = category === "Movie" ? Film : Tv;
   const href = category === "Movie" ? `/movie/${id}` : `/tv/${id}`;
+  const bookmarked = isBookmarked(id, category);
 
-  const handleAddBookmark = async (e: React.MouseEvent) => {
+  const handleToggleBookmark = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!userId) {
-      console.error("User not authenticated");
+    if (!userId || isLoading) {
       return;
     }
-    await addBookmark(userId, { id, title, year, category, rating, thumbnail });
+
+    setIsLoading(true);
+
+    if (bookmarked) {
+      removeBookmarkFromContext(id, category);
+      const result = await removeBookmark(userId!, id, category);
+      if (result.error) {
+        addBookmarkToContext(id, category);
+        console.error("Failed to remove bookmark:", result.error);
+      }
+    } else {
+      addBookmarkToContext(id, category);
+      const result = await addBookmark(userId!, { id, title, year, category, rating, thumbnail });
+      if (result.error) {
+        removeBookmarkFromContext(id, category);
+        console.error("Failed to add bookmark:", result.error);
+      }
+    }
+
+    setIsLoading(false);
   };
 
   return (
@@ -57,11 +81,15 @@ const RecommendedCard = ({
         )}
 
         <button
-          className="absolute top-2 right-2 w-8 h-8 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer"
-          onClick={handleAddBookmark}
-          disabled={!userId}
+          className="absolute top-2 right-2 w-8 h-8 bg-background/50 rounded-full flex items-center justify-center hover:bg-white transition-colors group/btn z-10 cursor-pointer disabled:opacity-50"
+          onClick={handleToggleBookmark}
+          disabled={!userId || isLoading}
         >
-          <IconBookmarkEmpty className="w-3 h-3.5 text-white group-hover/btn:text-black" />
+          {bookmarked ? (
+            <IconBookmark className="w-3 h-3.5 text-white group-hover/btn:text-black" />
+          ) : (
+            <IconBookmarkEmpty className="w-3 h-3.5 text-white group-hover/btn:text-black" />
+          )}
         </button>
 
         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">

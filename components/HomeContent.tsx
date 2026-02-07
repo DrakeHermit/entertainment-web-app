@@ -7,8 +7,10 @@ import { useSearchResults } from "@/lib/hooks/useSearchResults";
 
 export default function HomeContent({
   children,
+  userId,
 }: {
   children: React.ReactNode;
+  userId?: number;
 }) {
   const searchParams = useSearchParams();
   const q = searchParams.get("q");
@@ -31,7 +33,7 @@ export default function HomeContent({
       <h2 className="text-3xl font-medium text-white mb-400">
         Found {searchResults!.length} results for &apos;{q}&apos;
       </h2>
-      <RecommendedSection recommended={searchResults!} />
+      <RecommendedSection recommended={searchResults!} userId={userId} />
     </div>
   );
 }
