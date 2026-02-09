@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { AddBookmarkProps } from "@/lib/types/types";
 import { db } from "@/lib/db/drizzle";
 import { bookmarkedMovies, bookmarkedTvSeries, movies, tvSeries } from "@/lib/db/schema";
@@ -70,6 +71,7 @@ export async function addBookmark(
       });
     }
 
+    revalidatePath('/bookmarks');
     return { success: true };
   } catch (error) {
     console.error(error);

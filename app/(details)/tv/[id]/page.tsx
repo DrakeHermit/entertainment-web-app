@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import {
-  ArrowLeft,
   Tv,
   Star,
   Calendar,
@@ -12,6 +10,7 @@ import {
 import { getTVSeriesDetails } from "@/lib/tmdb";
 import { getUserId } from "@/lib/server-helpers";
 import BookmarkButton from "@/components/BookmarkButton";
+import DetailsBackButton from "@/components/DetailsBackButton";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -30,15 +29,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
 
   return (
     <div className="pb-8">
-      <div className="my-300 md:my-400 lg:my-500">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors border border-white rounded-full px-4 py-2"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </Link>
-      </div>
+      <DetailsBackButton />
 
       <div className="relative w-full aspect-video md:aspect-21/9 rounded-xl overflow-hidden mb-8">
         {tvSeries.backdrop_path ? (

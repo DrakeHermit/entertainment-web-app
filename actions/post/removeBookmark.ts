@@ -1,6 +1,7 @@
 'use server';
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db/drizzle";
 import { bookmarkedMovies, bookmarkedTvSeries, movies, tvSeries } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
@@ -57,6 +58,7 @@ export async function removeBookmark(
         );
     }
 
+    revalidatePath('/bookmarks');
     return { success: true };
   } catch (error) {
     console.error(error);

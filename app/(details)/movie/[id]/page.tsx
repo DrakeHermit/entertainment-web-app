@@ -1,17 +1,10 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
-import {
-  ArrowLeft,
-  Film,
-  Star,
-  Clock,
-  Calendar,
-  DollarSign,
-} from "lucide-react";
+import { Film, Star, Clock, Calendar, DollarSign } from "lucide-react";
 import { getMovieDetails } from "@/lib/tmdb";
 import { getUserId } from "@/lib/server-helpers";
 import BookmarkButton from "@/components/BookmarkButton";
+import DetailsBackButton from "@/components/DetailsBackButton";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -26,7 +19,10 @@ export default async function MovieDetailsPage({ params }: PageProps) {
   }
 
   const userIdData = await getUserId();
-  const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId =
+    userIdData && "userId" in userIdData
+      ? parseInt(userIdData.userId)
+      : undefined;
 
   const formatCurrency = (amount: number) => {
     if (amount === 0) return "N/A";
@@ -45,16 +41,8 @@ export default async function MovieDetailsPage({ params }: PageProps) {
   };
 
   return (
-    <div className="pb-8">
-      <div className="my-300 md:my-400 lg:my-500">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors border border-white rounded-full px-4 py-2"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Back</span>
-        </Link>
-      </div>
+    <div>
+      <DetailsBackButton />
 
       <div className="relative w-full aspect-video md:aspect-21/9 rounded-xl overflow-hidden mb-8">
         {movie.backdrop_path ? (
@@ -137,7 +125,11 @@ export default async function MovieDetailsPage({ params }: PageProps) {
               year={new Date(movie.release_date).getFullYear()}
               category="Movie"
               rating={movie.vote_average.toFixed(1)}
-              thumbnail={movie.backdrop_path ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}` : undefined}
+              thumbnail={
+                movie.backdrop_path
+                  ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`
+                  : undefined
+              }
               userId={userId}
             />
           </div>
