@@ -15,6 +15,7 @@ export async function registerAccount(
   const email = formData.get("email") as string;
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
+  const avatarUrl = formData.get("avatarUrl") as string | null;
 
   if (!email || !password) {
     return { error: "Email and password are required" };
@@ -32,6 +33,7 @@ export async function registerAccount(
       email,
       username: username || null,
       password: hashedPassword,
+      avatar_url: avatarUrl || null,
     }).returning();
 
     const token = genarateToken(user[0].id.toString());
