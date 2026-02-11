@@ -59,6 +59,10 @@ export async function removeBookmark(
     }
 
     revalidatePath('/bookmarks');
+    revalidatePath('/');
+    revalidatePath('/movies');
+    revalidatePath('/tv-series');
+    revalidatePath(`/${category === 'Movie' ? 'movie' : 'tv'}/${itemId}`);
     return { success: true };
   } catch (error) {
     console.error(error);

@@ -48,7 +48,7 @@ const BookmarksPage = async () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-400">
                 {bookmarksData.movies.map((movie) => (
                   <RecommendedCard
-                    key={movie.id}
+                    key={`movie-${movie.id}`}
                     id={movie.tmdb_id}
                     title={movie.title}
                     year={new Date(movie.release_date).getFullYear()}
@@ -70,7 +70,7 @@ const BookmarksPage = async () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-400">
                 {bookmarksData.series.map((series) => (
                   <RecommendedCard
-                    key={series.id}
+                    key={`series-${series.id}`}
                     id={series.tmdb_id}
                     title={series.name}
                     year={new Date(series.first_air_date).getFullYear()}

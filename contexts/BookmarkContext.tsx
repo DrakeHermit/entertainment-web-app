@@ -1,14 +1,21 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+  useEffect,
+} from "react";
 
 interface BookmarkContextType {
   isBookmarked: (id: number, category: "Movie" | "TV Series") => boolean;
-  addBookmarkToContext: (id: number, category: "Movie" | "TV Series") => void;
-  removeBookmarkFromContext: (id: number, category: "Movie" | "TV Series") => void;
 }
 
-const BookmarkContext = createContext<BookmarkContextType | undefined>(undefined);
+const BookmarkContext = createContext<BookmarkContextType | undefined>(
+  undefined,
+);
 
 export function BookmarkProvider({
   children,
@@ -20,50 +27,37 @@ export function BookmarkProvider({
   initialSeries: number[];
 }) {
   const [bookmarkedMovies, setBookmarkedMovies] = useState<Set<number>>(
-    new Set(initialMovies)
+    new Set(initialMovies),
   );
   const [bookmarkedSeries, setBookmarkedSeries] = useState<Set<number>>(
-    new Set(initialSeries)
+    new Set(initialSeries),
   );
 
-  const isBookmarked = useCallback((id: number, category: "Movie" | "TV Series") => {
-    if (category === "Movie") {
-      return bookmarkedMovies.has(id);
-    } else {
-      return bookmarkedSeries.has(id);
-    }
-  }, [bookmarkedMovies, bookmarkedSeries]);
+  useEffect(() => {
+    setBookmarkedMovies(new Set(initialMovies));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialMovies)]);
 
-  const addBookmarkToContext = useCallback((id: number, category: "Movie" | "TV Series") => {
-    if (category === "Movie") {
-      setBookmarkedMovies(prev => new Set(prev).add(id));
-    } else {
-      setBookmarkedSeries(prev => new Set(prev).add(id));
-    }
-  }, []);
+  useEffect(() => {
+    setBookmarkedSeries(new Set(initialSeries));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialSeries)]);
 
-  const removeBookmarkFromContext = useCallback((id: number, category: "Movie" | "TV Series") => {
-    if (category === "Movie") {
-      setBookmarkedMovies(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
-    } else {
-      setBookmarkedSeries(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
-    }
-  }, []);
+  const isBookmarked = useCallback(
+    (id: number, category: "Movie" | "TV Series") => {
+      if (category === "Movie") {
+        return bookmarkedMovies.has(id);
+      } else {
+        return bookmarkedSeries.has(id);
+      }
+    },
+    [bookmarkedMovies, bookmarkedSeries],
+  );
 
   return (
     <BookmarkContext.Provider
       value={{
         isBookmarked,
-        addBookmarkToContext,
-        removeBookmarkFromContext,
       }}
     >
       {children}

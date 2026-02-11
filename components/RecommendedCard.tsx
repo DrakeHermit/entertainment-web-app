@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Film, Tv } from "lucide-react";
 import { IconBookmarkEmpty, IconBookmark } from "@/components/Icons";
-import { addBookmark } from "@/actions/post/addBookmark";
-import { removeBookmark } from "@/actions/post/removeBookmark";
-import { useBookmarks } from "@/contexts/BookmarkContext";
+import { useBookmarkToggle } from "@/lib/hooks/useBookmarkToggle";
 
 interface RecommendedCardProps {
   id: number;
@@ -30,38 +27,23 @@ const RecommendedCard = ({
   priority = false,
   userId,
 }: RecommendedCardProps) => {
-  const { isBookmarked, addBookmarkToContext, removeBookmarkFromContext } = useBookmarks();
-  const [isLoading, setIsLoading] = useState(false);
+  const { bookmarked, isLoading, toggleBookmark } = useBookmarkToggle({
+    id,
+    title,
+    year,
+    category,
+    rating,
+    thumbnail,
+    userId,
+  });
+
   const CategoryIcon = category === "Movie" ? Film : Tv;
   const href = category === "Movie" ? `/movie/${id}` : `/tv/${id}`;
-  const bookmarked = isBookmarked(id, category);
 
-  const handleToggleBookmark = async (e: React.MouseEvent) => {
+  const handleToggleBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!userId || isLoading) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    if (bookmarked) {
-      removeBookmarkFromContext(id, category);
-      const result = await removeBookmark(userId!, id, category);
-      if (result.error) {
-        addBookmarkToContext(id, category);
-        console.error("Failed to remove bookmark:", result.error);
-      }
-    } else {
-      addBookmarkToContext(id, category);
-      const result = await addBookmark(userId!, { id, title, year, category, rating, thumbnail });
-      if (result.error) {
-        removeBookmarkFromContext(id, category);
-        console.error("Failed to add bookmark:", result.error);
-      }
-    }
-
-    setIsLoading(false);
+    toggleBookmark();
   };
 
   return (
