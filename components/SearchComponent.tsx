@@ -26,6 +26,12 @@ const SearchInput = ({ pathname }: { pathname: string }) => {
         router.push(pathname, { scroll: false });
       }
     }, 400);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   };
 
   return (

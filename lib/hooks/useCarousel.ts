@@ -75,12 +75,6 @@ export const useCarousel = () => {
   return {
     containerRef,
     trackRef,
-    isDragging,
-    startX,
-    prevTranslate,
-    currentTranslate,
-    getMaxScroll,
-    setPosition,
     handlePointerDown,
     handlePointerMove,
     handlePointerUp,

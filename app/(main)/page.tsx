@@ -17,10 +17,13 @@ async function RecommendedBlock({ userId }: { userId?: number }) {
   return <RecommendedSection recommended={popular} userId={userId} />;
 }
 
-const userIdData = await getUserId();
-const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
+export default async function Home() {
+  const userIdData = await getUserId();
+  const userId =
+    userIdData && "userId" in userIdData
+      ? parseInt(userIdData.userId)
+      : undefined;
 
-export default function Home() {
   return (
     <HomeContent userId={userId}>
       <div>
