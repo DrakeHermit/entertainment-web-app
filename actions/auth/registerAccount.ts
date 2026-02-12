@@ -1,6 +1,6 @@
 "use server";
 
-import { genarateToken } from "@/lib/auth/genarateToken";
+import { generateToken } from "@/lib/auth/generateToken";
 import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import bcrypt from "bcrypt";
@@ -36,7 +36,7 @@ export async function registerAccount(
       avatar_url: avatarUrl || null,
     }).returning();
 
-    const token = genarateToken(user[0].id.toString());
+    const token = generateToken(user[0].id.toString());
     
     await db.update(users).set({ jwt_token: token }).where(eq(users.id, user[0].id));
 

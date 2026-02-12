@@ -1,6 +1,8 @@
 import RecommendedSection from "@/components/RecommendedSection";
 import { getPopularTVSeries, searchTVSeries } from "@/lib/tmdb";
 import { getUserId } from "@/lib/server-helpers";
+import { Suspense } from "react";
+import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
 
 type PageProps = {
   searchParams: Promise<{ q?: string }>;
@@ -9,7 +11,7 @@ type PageProps = {
 const TvSeriesPage = async ({ searchParams }: PageProps) => {
   const { q } = await searchParams;
   const userIdData = await getUserId();
-  const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
 
   if (q) {
     const searchResults = await searchTVSeries(q);
@@ -30,7 +32,9 @@ const TvSeriesPage = async ({ searchParams }: PageProps) => {
       <h2 className="text-3xl font-medium text-white mb-300">
         Popular TV Series
       </h2>
-      <RecommendedSection recommended={popular} userId={userId} />
+      <Suspense fallback={<RecommendedSectionSkeleton />}>
+        <RecommendedSection recommended={popular} userId={userId} />
+      </Suspense>
     </div>
   );
 };

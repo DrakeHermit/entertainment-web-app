@@ -11,7 +11,7 @@ type PageProps = {
 const MoviesPage = async ({ searchParams }: PageProps) => {
   const { q } = await searchParams;
   const userIdData = await getUserId();
-  const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
 
   if (q) {
     const searchResults = await searchMovies(q);

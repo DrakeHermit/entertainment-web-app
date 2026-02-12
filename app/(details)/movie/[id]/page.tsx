@@ -19,10 +19,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
   }
 
   const userIdData = await getUserId();
-  const userId =
-    userIdData && "userId" in userIdData
-      ? parseInt(userIdData.userId)
-      : undefined;
+  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
 
   const formatCurrency = (amount: number) => {
     if (amount === 0) return "N/A";

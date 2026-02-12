@@ -1,12 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import {
-  Tv,
-  Star,
-  Calendar,
-  Layers,
-  Film as FilmIcon,
-} from "lucide-react";
+import { Tv, Star, Calendar, Layers, Film as FilmIcon } from "lucide-react";
 import { getTVSeriesDetails } from "@/lib/tmdb";
 import { getUserId } from "@/lib/server-helpers";
 import BookmarkButton from "@/components/BookmarkButton";
@@ -25,7 +19,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
   }
 
   const userIdData = await getUserId();
-  const userId = userIdData && 'userId' in userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
 
   return (
     <div className="pb-8">
@@ -118,7 +112,11 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
               year={new Date(tvSeries.first_air_date).getFullYear()}
               category="TV Series"
               rating={tvSeries.vote_average.toFixed(1)}
-              thumbnail={tvSeries.backdrop_path ? `https://image.tmdb.org/t/p/w500${tvSeries.backdrop_path}` : undefined}
+              thumbnail={
+                tvSeries.backdrop_path
+                  ? `https://image.tmdb.org/t/p/w500${tvSeries.backdrop_path}`
+                  : undefined
+              }
               userId={userId}
             />
           </div>

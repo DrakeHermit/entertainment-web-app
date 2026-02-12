@@ -7,10 +7,7 @@ import { getUserId } from "@/lib/server-helpers";
 const BookmarksLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await getUserData();
   const userIdData = await getUserId();
-  const userId =
-    userIdData && "userId" in userIdData
-      ? parseInt(userIdData.userId)
-      : undefined;
+  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
   const bookmarks = userId
     ? await getUserBookmarksData(userId)
     : { movies: [], series: [] };
