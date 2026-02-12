@@ -19,20 +19,21 @@ export async function checkSessionValid() {
   }
 }
 
-export async function getSessionUser() {
+export async function getUserId(): Promise<number | null> {
   const decoded = await checkSessionValid();
   if (!decoded) {
     return null;
   }
-  return decoded as { userId: string };
+  const { userId } = decoded as { userId: string };
+  return parseInt(userId);
 }
 
 export async function getUserData() {
-  const session = await getSessionUser();
-  if (!session) {
+  const userId = await getUserId();
+  if (!userId) {
     return null;
   }
-  
+
   try {
     const user = await db
       .select({
@@ -42,9 +43,9 @@ export async function getUserData() {
         avatar_url: users.avatar_url,
       })
       .from(users)
-      .where(eq(users.id, parseInt(session.userId)))
+      .where(eq(users.id, userId))
       .limit(1);
-    
+
     return user[0] || null;
   } catch (error) {
     console.error(error);

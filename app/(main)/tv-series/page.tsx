@@ -1,6 +1,6 @@
 import RecommendedSection from "@/components/RecommendedSection";
 import { getPopularTVSeries, searchTVSeries } from "@/lib/tmdb";
-import { getUserId } from "@/lib/server-helpers";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 import { Suspense } from "react";
 import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
 
@@ -10,8 +10,7 @@ type PageProps = {
 
 const TvSeriesPage = async ({ searchParams }: PageProps) => {
   const { q } = await searchParams;
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
 
   if (q) {
     const searchResults = await searchTVSeries(q);

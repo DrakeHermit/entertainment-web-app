@@ -1,13 +1,11 @@
 import NavBar from "@/components/NavBar";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
-import { getUserData } from "@/lib/auth/checkSessionValid";
+import { getUserData, getUserId } from "@/lib/auth/checkSessionValid";
 import { getUserBookmarksData } from "@/actions/post/getUserBookmarksData";
-import { getUserId } from "@/lib/server-helpers";
 
 const BookmarksLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await getUserData();
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
   const bookmarks = userId
     ? await getUserBookmarksData(userId)
     : { movies: [], series: [] };

@@ -5,7 +5,7 @@ import { db } from "@/lib/db/drizzle";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getSessionUser } from "@/lib/auth/checkSessionValid";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 
 export async function logoutAccount() {
   const cookieStore = await cookies();
@@ -15,8 +15,10 @@ export async function logoutAccount() {
     redirect("/login");
   }
   try {
-    const userId = await getSessionUser();
-    await db.update(users).set({ jwt_token: null }).where(eq(users.id, Number(userId?.userId)));
+    const userId = await getUserId();
+    if (userId) {
+      await db.update(users).set({ jwt_token: null }).where(eq(users.id, userId));
+    }
     cookieStore.delete("token");
   } catch (error) {
     console.error(error);

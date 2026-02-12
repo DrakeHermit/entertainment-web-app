@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Tv, Star, Calendar, Layers, Film as FilmIcon } from "lucide-react";
 import { getTVSeriesDetails } from "@/lib/tmdb";
-import { getUserId } from "@/lib/server-helpers";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 import BookmarkButton from "@/components/BookmarkButton";
 import DetailsBackButton from "@/components/DetailsBackButton";
 
@@ -18,8 +18,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
     notFound();
   }
 
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
 
   return (
     <div className="pb-8">

@@ -12,6 +12,7 @@ import {
 import UserAvatar from "@/components/UserAvatar";
 import UserMenu from "@/components/UserMenu";
 import { useUserMenu } from "@/lib/hooks/useUserMenu";
+import { User } from "@/lib/types/types";
 
 const navItems = [
   { href: "/", Icon: IconHome, label: "Home" },
@@ -19,13 +20,6 @@ const navItems = [
   { href: "/tv-series", Icon: IconTvSeries, label: "TV Series" },
   { href: "/bookmarks", Icon: IconBookmark, label: "Bookmarks" },
 ];
-
-type User = {
-  id: number;
-  email: string;
-  username: string | null;
-  avatar_url: string | null;
-};
 
 type NavBarProps = {
   user?: User | null;

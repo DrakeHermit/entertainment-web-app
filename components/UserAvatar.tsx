@@ -2,13 +2,7 @@
 
 import { UserCircle } from "lucide-react";
 import Image from "next/image";
-
-type User = {
-  id: number;
-  email: string;
-  username: string | null;
-  avatar_url: string | null;
-};
+import { User } from "@/lib/types/types";
 
 type UserAvatarProps = {
   user: User | null;

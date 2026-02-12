@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Film, Star, Clock, Calendar, DollarSign } from "lucide-react";
 import { getMovieDetails } from "@/lib/tmdb";
-import { getUserId } from "@/lib/server-helpers";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 import BookmarkButton from "@/components/BookmarkButton";
 import DetailsBackButton from "@/components/DetailsBackButton";
 
@@ -18,8 +18,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
     notFound();
   }
 
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
 
   const formatCurrency = (amount: number) => {
     if (amount === 0) return "N/A";

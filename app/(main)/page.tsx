@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import CarouselSkeleton from "@/components/CarouselSkeleton";
 import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
 import HomeContent from "@/components/HomeContent";
-import { getUserId } from "@/lib/server-helpers";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 
 async function TopRatedCarousel({ userId }: { userId?: number }) {
   const topRated = await getTopRatedAll();
@@ -18,8 +18,7 @@ async function RecommendedBlock({ userId }: { userId?: number }) {
 }
 
 export default async function Home() {
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
 
   return (
     <HomeContent userId={userId}>

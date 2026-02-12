@@ -1,13 +1,7 @@
 "use client";
 
 import { LogOut, LogIn, UserPlus } from "lucide-react";
-
-type User = {
-  id: number;
-  email: string;
-  username: string | null;
-  avatar_url: string | null;
-};
+import { User } from "@/lib/types/types";
 
 type UserMenuProps = {
   user: User | null;

@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { IconBookmarkEmpty } from "@/components/Icons";
-import { getSessionUser } from "@/lib/auth/checkSessionValid";
-import { getUserId } from "@/lib/server-helpers";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 import { getUserBookmarksData } from "@/actions/post/getUserBookmarksData";
 import RecommendedCard from "@/components/RecommendedCard";
 
 const BookmarksPage = async () => {
-  const sessionUser = await getSessionUser();
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
   const bookmarksData = userId
     ? await getUserBookmarksData(userId)
     : { movies: [], series: [] };
@@ -16,7 +13,7 @@ const BookmarksPage = async () => {
   const hasBookmarks =
     bookmarksData.movies.length > 0 || bookmarksData.series.length > 0;
 
-  return sessionUser ? (
+  return userId ? (
     <div className="flex flex-col mt-400">
       <h2 className="text-3xl font-medium text-white mb-400">
         Bookmarked Movies & TV Series

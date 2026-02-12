@@ -127,3 +127,10 @@ export interface AddBookmarkProps {
   rating: string;
   thumbnail?: string;
 }
+
+export interface User {
+  id: number;
+  email: string;
+  username: string | null;
+  avatar_url: string | null;
+}

@@ -1,7 +1,7 @@
 import RecommendedSection from "@/components/RecommendedSection";
 import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
 import { getPopularMovies, searchMovies } from "@/lib/tmdb";
-import { getUserId } from "@/lib/server-helpers";
+import { getUserId } from "@/lib/auth/checkSessionValid";
 import { Suspense } from "react";
 
 type PageProps = {
@@ -10,8 +10,7 @@ type PageProps = {
 
 const MoviesPage = async ({ searchParams }: PageProps) => {
   const { q } = await searchParams;
-  const userIdData = await getUserId();
-  const userId = userIdData ? parseInt(userIdData.userId) : undefined;
+  const userId = (await getUserId()) ?? undefined;
 
   if (q) {
     const searchResults = await searchMovies(q);
