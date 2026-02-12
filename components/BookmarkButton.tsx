@@ -46,7 +46,7 @@ export default function BookmarkButton({
         <IconBookmarkEmpty className="w-4 h-4" />
       )}
       <span className="font-medium">
-        {isLoading ? "Loading..." : bookmarked ? "Bookmarked" : "Bookmark"}
+        {bookmarked ? "Bookmarked" : "Bookmark"}
       </span>
     </button>
   );

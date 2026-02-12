@@ -3,14 +3,23 @@
 import {
   createContext,
   useContext,
-  useState,
+  useOptimistic,
   useCallback,
   ReactNode,
-  useEffect,
 } from "react";
+
+type BookmarkUpdate = {
+  id: number;
+  type: "add" | "remove";
+};
 
 interface BookmarkContextType {
   isBookmarked: (id: number, category: "Movie" | "TV Series") => boolean;
+  updateOptimisticBookmark: (
+    id: number,
+    category: "Movie" | "TV Series",
+    type: "add" | "remove",
+  ) => void;
 }
 
 const BookmarkContext = createContext<BookmarkContextType | undefined>(
@@ -26,38 +35,53 @@ export function BookmarkProvider({
   initialMovies: number[];
   initialSeries: number[];
 }) {
-  const [bookmarkedMovies, setBookmarkedMovies] = useState<Set<number>>(
-    new Set(initialMovies),
-  );
-  const [bookmarkedSeries, setBookmarkedSeries] = useState<Set<number>>(
-    new Set(initialSeries),
+  const [optimisticMovies, addOptimisticMovie] = useOptimistic(
+    initialMovies,
+    (currentMovies: number[], update: BookmarkUpdate) => {
+      if (update.type === "add") {
+        return [...currentMovies, update.id];
+      }
+      return currentMovies.filter((movieId) => movieId !== update.id);
+    },
   );
 
-  useEffect(() => {
-    setBookmarkedMovies(new Set(initialMovies));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(initialMovies)]);
-
-  useEffect(() => {
-    setBookmarkedSeries(new Set(initialSeries));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(initialSeries)]);
+  const [optimisticSeries, addOptimisticSeries] = useOptimistic(
+    initialSeries,
+    (currentSeries: number[], update: BookmarkUpdate) => {
+      if (update.type === "add") {
+        return [...currentSeries, update.id];
+      }
+      return currentSeries.filter((seriesId) => seriesId !== update.id);
+    },
+  );
 
   const isBookmarked = useCallback(
     (id: number, category: "Movie" | "TV Series") => {
       if (category === "Movie") {
-        return bookmarkedMovies.has(id);
+        return optimisticMovies.includes(id);
+      }
+      return optimisticSeries.includes(id);
+    },
+    [optimisticMovies, optimisticSeries],
+  );
+
+  const updateOptimisticBookmark = useCallback(
+    (id: number, category: "Movie" | "TV Series", type: "add" | "remove") => {
+      const update: BookmarkUpdate = { id, type };
+      if (category === "Movie") {
+        addOptimisticMovie(update);
       } else {
-        return bookmarkedSeries.has(id);
+        addOptimisticSeries(update);
       }
     },
-    [bookmarkedMovies, bookmarkedSeries],
+    [addOptimisticMovie, addOptimisticSeries],
   );
 
   return (
     <BookmarkContext.Provider
       value={{
         isBookmarked,
+        updateOptimisticBookmark,
       }}
     >
       {children}

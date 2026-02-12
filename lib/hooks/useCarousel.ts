@@ -4,6 +4,7 @@ export const useCarousel = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const hasDragged = useRef(false);
   const startX = useRef(0);
   const prevTranslate = useRef(0);
   const currentTranslate = useRef(0);
@@ -23,6 +24,7 @@ export const useCarousel = () => {
 
   const handlePointerDown = (e: React.PointerEvent) => {
     isDragging.current = true;
+    hasDragged.current = false;
     startX.current = e.clientX;
     trackRef.current?.style.setProperty("transition", "none");
 
@@ -35,6 +37,11 @@ export const useCarousel = () => {
     e.preventDefault();
 
     const diff = e.clientX - startX.current;
+
+    if (Math.abs(diff) > 5) {
+      hasDragged.current = true;
+    }
+
     currentTranslate.current = prevTranslate.current + diff;
 
     const maxScroll = getMaxScroll();
@@ -72,6 +79,13 @@ export const useCarousel = () => {
     handlePointerUp(e);
   };
 
+  const handleClickCapture = useCallback((e: React.MouseEvent) => {
+    if (hasDragged.current) {
+      e.preventDefault();
+      hasDragged.current = false;
+    }
+  }, []);
+
   return {
     containerRef,
     trackRef,
@@ -79,5 +93,6 @@ export const useCarousel = () => {
     handlePointerMove,
     handlePointerUp,
     handlePointerCancel,
+    handleClickCapture,
   };
 };

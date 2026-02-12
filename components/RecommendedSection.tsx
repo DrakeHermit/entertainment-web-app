@@ -18,7 +18,7 @@ const RecommendedSection = ({ recommended, userId }: { recommended: TrendingItem
               ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
               : undefined
           }
-          priority={false}
+          priority={index < 4}
           userId={userId}
         />
       ))}

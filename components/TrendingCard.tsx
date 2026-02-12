@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { Film, Tv } from "lucide-react";
 import { IconBookmarkEmpty, IconBookmark } from "@/components/Icons";
@@ -28,8 +27,6 @@ const TrendingCard = ({
   priority = false,
   userId,
 }: TrendingCardProps) => {
-  const router = useRouter();
-  const startPos = useRef({ x: 0, y: 0 });
   const { bookmarked, isLoading, toggleBookmark } = useBookmarkToggle({
     id,
     title,
@@ -43,29 +40,17 @@ const TrendingCard = ({
   const CategoryIcon = category === "Movie" ? Film : Tv;
   const href = category === "Movie" ? `/movie/${id}` : `/tv/${id}`;
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    startPos.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    const dx = Math.abs(e.clientX - startPos.current.x);
-    const dy = Math.abs(e.clientY - startPos.current.y);
-
-    if (dx < 5 && dy < 5) {
-      router.push(href);
-    }
-  };
-
   const handleToggleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
     toggleBookmark();
   };
 
   return (
-    <div
-      className="relative min-w-[240px] md:min-w-[470px] h-[140px] md:h-[230px] rounded-lg overflow-hidden group cursor-pointer mb-500"
-      onMouseDown={handleMouseDown}
-      onClick={handleClick}
+    <Link
+      href={href}
+      draggable={false}
+      className="relative min-w-[240px] md:min-w-[470px] h-[140px] md:h-[230px] rounded-lg overflow-hidden group cursor-pointer mb-500 block"
     >
       {thumbnail ? (
         <Image
@@ -114,7 +99,7 @@ const TrendingCard = ({
           <span className="text-white font-medium">Play</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

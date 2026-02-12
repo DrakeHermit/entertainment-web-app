@@ -13,6 +13,7 @@ const Carousel = ({ trending, userId }: { trending: TrendingItem[]; userId?: num
     handlePointerMove,
     handlePointerUp,
     handlePointerCancel,
+    handleClickCapture,
   } = useCarousel();
 
   return (
@@ -23,6 +24,7 @@ const Carousel = ({ trending, userId }: { trending: TrendingItem[]; userId?: num
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
+      onClickCapture={handleClickCapture}
     >
       <div ref={trackRef} className="flex gap-4 md:gap-500 w-max">
         {trending.map((item, index) => (
@@ -38,7 +40,7 @@ const Carousel = ({ trending, userId }: { trending: TrendingItem[]; userId?: num
                 ? `https://image.tmdb.org/t/p/w500${item.backdrop_path}`
                 : undefined
             }
-            priority={false}
+            priority={index < 3}
             userId={userId}
           />
         ))}

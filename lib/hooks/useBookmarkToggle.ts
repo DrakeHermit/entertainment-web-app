@@ -1,4 +1,4 @@
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addBookmark } from "@/actions/post/addBookmark";
 import { removeBookmark } from "@/actions/post/removeBookmark";
@@ -23,24 +23,24 @@ export function useBookmarkToggle({
   thumbnail,
   userId,
 }: UseBookmarkToggleProps) {
-  const { isBookmarked } = useBookmarks();
-  const [isLoading, setIsLoading] = useState(false);
+  const { isBookmarked, updateOptimisticBookmark } = useBookmarks();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const bookmarked = isBookmarked(id, category);
 
-  const toggleBookmark = async () => {
-    if (!userId || isLoading) {
+  const toggleBookmark = () => {
+    if (!userId || isPending) {
       return;
     }
 
-    setIsLoading(true);
+    startTransition(async () => {
+      updateOptimisticBookmark(id, category, bookmarked ? "remove" : "add");
 
-    try {
       if (bookmarked) {
         const result = await removeBookmark(userId, id, category);
         if (result.error) {
           console.error("Failed to remove bookmark:", result.error);
+          return;
         }
       } else {
         const result = await addBookmark(userId, {
@@ -53,20 +53,17 @@ export function useBookmarkToggle({
         });
         if (result.error) {
           console.error("Failed to add bookmark:", result.error);
+          return;
         }
       }
 
-      startTransition(() => {
-        router.refresh();
-      });
-    } finally {
-      setIsLoading(false);
-    }
+      router.refresh();
+    });
   };
 
   return {
     bookmarked,
-    isLoading: isLoading || isPending,
+    isLoading: isPending,
     toggleBookmark,
   };
 }
