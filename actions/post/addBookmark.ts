@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { AddBookmarkProps } from "@/lib/types/types";
 import { db } from "@/lib/db/drizzle";
 import { bookmarkedMovies, bookmarkedTvSeries, movies, tvSeries } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function addBookmark(
   userId: number, 
@@ -39,6 +39,21 @@ export async function addBookmark(
         movieId = existingMovie[0].id;
       }
 
+      const existingBookmark = await db
+        .select()
+        .from(bookmarkedMovies)
+        .where(
+          and(
+            eq(bookmarkedMovies.user_id, userId),
+            eq(bookmarkedMovies.movie_id, movieId),
+          )
+        )
+        .limit(1);
+
+      if (existingBookmark.length > 0) {
+        return { success: true };
+      }
+
       await db.insert(bookmarkedMovies).values({
         user_id: userId,
         movie_id: movieId,
@@ -63,6 +78,21 @@ export async function addBookmark(
         seriesId = newSeries[0].id;
       } else {
         seriesId = existingSeries[0].id;
+      }
+
+      const existingBookmark = await db
+        .select()
+        .from(bookmarkedTvSeries)
+        .where(
+          and(
+            eq(bookmarkedTvSeries.user_id, userId),
+            eq(bookmarkedTvSeries.series_id, seriesId),
+          )
+        )
+        .limit(1);
+
+      if (existingBookmark.length > 0) {
+        return { success: true };
       }
 
       await db.insert(bookmarkedTvSeries).values({
