@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { loginAccount } from "@/actions/auth/loginAccount";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 const LoginPage = () => {
   const [state, formAction, isPending] = useActionState(loginAccount, {
@@ -36,9 +37,18 @@ const LoginPage = () => {
     setPassword(e.target.value);
   };
 
-  if (state.success) {
-    redirect("/");
-  }
+  useEffect(() => {
+    if (state.success) {
+      toast.success("Logged in successfully", {
+        style: {
+          background: "#40eb34",
+          color: "#000",
+          fontWeight: "bold",
+        },
+      });
+      redirect("/");
+    }
+  }, [state.success]);
 
   return (
     <div className="w-full max-w-[400px] bg-semi-dark-blue rounded-2xl p-8">

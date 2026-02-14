@@ -6,7 +6,6 @@ import { users } from "@/lib/db/schema";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { ActionState } from "@/lib/types/types";
 
 export async function loginAccount(
@@ -42,6 +41,5 @@ export async function loginAccount(
     maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
     path: "/",
   });
-
   return { error: null, success: true };
 }
