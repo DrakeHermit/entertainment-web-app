@@ -5,6 +5,7 @@ import {
   useContext,
   useOptimistic,
   useCallback,
+  useState,
   ReactNode,
 } from "react";
 
@@ -20,6 +21,7 @@ interface BookmarkContextType {
     category: "Movie" | "TV Series",
     type: "add" | "remove",
   ) => void;
+  hydrateBookmarks: (movies: number[], series: number[]) => void;
 }
 
 const BookmarkContext = createContext<BookmarkContextType | undefined>(
@@ -35,8 +37,11 @@ export function BookmarkProvider({
   initialMovies: number[];
   initialSeries: number[];
 }) {
+  const [movieBookmarks, setMovieBookmarks] = useState(initialMovies);
+  const [seriesBookmarks, setSeriesBookmarks] = useState(initialSeries);
+
   const [optimisticMovies, addOptimisticMovie] = useOptimistic(
-    initialMovies,
+    movieBookmarks,
     (currentMovies: number[], update: BookmarkUpdate) => {
       if (update.type === "add") {
         return [...currentMovies, update.id];
@@ -46,13 +51,21 @@ export function BookmarkProvider({
   );
 
   const [optimisticSeries, addOptimisticSeries] = useOptimistic(
-    initialSeries,
+    seriesBookmarks,
     (currentSeries: number[], update: BookmarkUpdate) => {
       if (update.type === "add") {
         return [...currentSeries, update.id];
       }
       return currentSeries.filter((seriesId) => seriesId !== update.id);
     },
+  );
+
+  const hydrateBookmarks = useCallback(
+    (movies: number[], series: number[]) => {
+      setMovieBookmarks(movies);
+      setSeriesBookmarks(series);
+    },
+    [],
   );
 
   const isBookmarked = useCallback(
@@ -82,6 +95,7 @@ export function BookmarkProvider({
       value={{
         isBookmarked,
         updateOptimisticBookmark,
+        hydrateBookmarks,
       }}
     >
       {children}
