@@ -2,7 +2,7 @@ import NavBar from "@/components/NavBar";
 import SearchComponent from "@/components/SearchComponent";
 import BookmarkSetter from "@/components/BookmarkSetter";
 import { getUserData, getUserId } from "@/lib/auth/checkSessionValid";
-import { getUserBookmarks } from "@/actions/post/getUserBookmarks";
+import { getUserBookmarks } from "@/queries/bookmarks/getUserBookmarks";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import { Suspense } from "react";
 

@@ -1,7 +1,7 @@
 import NavBar from "@/components/NavBar";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import { getUserData, getUserId } from "@/lib/auth/checkSessionValid";
-import { getUserBookmarksData } from "@/actions/post/getUserBookmarksData";
+import { getUserBookmarksData } from "@/queries/bookmarks/getUserBookmarksData";
 
 const BookmarksLayout = async ({ children }: { children: React.ReactNode }) => {
   const user = await getUserData();

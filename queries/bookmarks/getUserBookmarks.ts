@@ -1,5 +1,3 @@
-'use server';
-
 import { cookies } from "next/headers";
 import { db } from "@/lib/db/drizzle";
 import { bookmarkedMovies, bookmarkedTvSeries, movies, tvSeries } from "@/lib/db/schema";
@@ -26,8 +24,8 @@ export async function getUserBookmarks(userId: number) {
       .where(eq(bookmarkedTvSeries.user_id, userId));
 
     return {
-      movies: bookmarkedMoviesData.map(m => m.tmdb_id),
-      series: bookmarkedSeriesData.map(s => s.tmdb_id)
+      movies: bookmarkedMoviesData.map((m) => m.tmdb_id),
+      series: bookmarkedSeriesData.map((s) => s.tmdb_id),
     };
   } catch (error) {
     console.error(error);

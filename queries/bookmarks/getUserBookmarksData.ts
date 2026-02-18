@@ -1,5 +1,3 @@
-'use server';
-
 import { cookies } from "next/headers";
 import { db } from "@/lib/db/drizzle";
 import { bookmarkedMovies, bookmarkedTvSeries, movies, tvSeries } from "@/lib/db/schema";
@@ -11,7 +9,7 @@ export async function getUserBookmarksData(userId: number) {
   if (!token) {
     return { movies: [], series: [] };
   }
-  
+
   try {
     const bookmarkedMoviesData = await db
       .select({
@@ -41,10 +39,10 @@ export async function getUserBookmarksData(userId: number) {
 
     return {
       movies: bookmarkedMoviesData,
-      series: bookmarkedSeriesData
+      series: bookmarkedSeriesData,
     };
   } catch (error) {
-    console.error('Error fetching user bookmarks data:', error);
+    console.error("Error fetching user bookmarks data:", error);
     return { movies: [], series: [] };
   }
 }

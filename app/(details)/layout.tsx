@@ -1,6 +1,6 @@
 import NavBar from "@/components/NavBar";
 import { getUserData, getUserId } from "@/lib/auth/checkSessionValid";
-import { getUserBookmarks } from "@/actions/post/getUserBookmarks";
+import { getUserBookmarks } from "@/queries/bookmarks/getUserBookmarks";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
 
 const DetailsLayout = async ({ children }: { children: React.ReactNode }) => {

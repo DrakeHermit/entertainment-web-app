@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { IconBookmarkEmpty } from "@/components/Icons";
 import { getUserId } from "@/lib/auth/checkSessionValid";
-import { getUserBookmarksData } from "@/actions/post/getUserBookmarksData";
+import { getUserBookmarksData } from "@/queries/bookmarks/getUserBookmarksData";
 import RecommendedCard from "@/components/RecommendedCard";
 
 const BookmarksPage = async () => {

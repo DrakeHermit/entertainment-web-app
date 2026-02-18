@@ -42,3 +42,21 @@ export const bookmarkedTvSeries = pgTable('bookmarked_tv_series', {
   series_id: integer().notNull().references(() => tvSeries.id, { onDelete: 'cascade' }),
   bookmarked_at: timestamp().notNull().defaultNow(),
 });
+
+export const movieComments = pgTable('movie_comments', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  movie_id: integer().notNull().references(() => movies.id, { onDelete: 'cascade' }),
+  content: text().notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+});
+
+export const tvSeriesComments = pgTable('tv_series_comments', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  series_id: integer().notNull().references(() => tvSeries.id, { onDelete: 'cascade' }),
+  content: text().notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+  updated_at: timestamp().notNull().defaultNow(),
+});
