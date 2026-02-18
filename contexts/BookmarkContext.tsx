@@ -82,12 +82,24 @@ export function BookmarkProvider({
     (id: number, category: "Movie" | "TV Series", type: "add" | "remove") => {
       const update: BookmarkUpdate = { id, type };
       if (category === "Movie") {
+        setMovieBookmarks((prev) => {
+          if (type === "add") {
+            return prev.includes(id) ? prev : [...prev, id];
+          }
+          return prev.filter((movieId) => movieId !== id);
+        });
         addOptimisticMovie(update);
       } else {
+        setSeriesBookmarks((prev) => {
+          if (type === "add") {
+            return prev.includes(id) ? prev : [...prev, id];
+          }
+          return prev.filter((seriesId) => seriesId !== id);
+        });
         addOptimisticSeries(update);
       }
     },
-    [addOptimisticMovie, addOptimisticSeries],
+    [addOptimisticMovie, addOptimisticSeries, setMovieBookmarks, setSeriesBookmarks],
   );
 
   return (
