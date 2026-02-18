@@ -134,3 +134,9 @@ export interface User {
   username: string | null;
   avatar_url: string | null;
 }
+
+export interface PostCommentProps {
+  movieId: number;
+  seriesId: number;
+  content: string;
+}
