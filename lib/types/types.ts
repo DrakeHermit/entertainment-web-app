@@ -136,7 +136,7 @@ export interface User {
 }
 
 export interface PostCommentProps {
-  movieId: number;
-  seriesId: number;
+  movieId: number | null;
+  seriesId: number | null;
   content: string;
 }
