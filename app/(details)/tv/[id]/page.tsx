@@ -5,6 +5,7 @@ import { getTVSeriesDetails } from "@/lib/tmdb";
 import { getUserId } from "@/lib/auth/checkSessionValid";
 import BookmarkButton from "@/components/BookmarkButton";
 import DetailsBackButton from "@/components/DetailsBackButton";
+import CommentField from "@/components/CommentField";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -226,6 +227,11 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
           )}
         </div>
       </div>
+      <CommentField
+        userId={userId ?? 0}
+        movieId={null ?? 0}
+        seriesId={tvSeries.id}
+      />
     </div>
   );
 }
