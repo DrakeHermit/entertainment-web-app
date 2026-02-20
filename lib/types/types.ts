@@ -140,3 +140,16 @@ export interface PostCommentProps {
   seriesId: number | null;
   content: string;
 }
+
+export interface CommentData {
+  id: number;
+  content: string;
+  created_at: Date;
+  updated_at: Date;
+  user: {
+    id: number;
+    username: string | null;
+    avatar_url: string | null;
+    email: string;
+  };
+}

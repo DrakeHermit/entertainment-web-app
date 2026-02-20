@@ -6,6 +6,7 @@ import { getUserId } from "@/lib/auth/checkSessionValid";
 import BookmarkButton from "@/components/BookmarkButton";
 import DetailsBackButton from "@/components/DetailsBackButton";
 import CommentField from "@/components/CommentField";
+import CommentList from "@/components/CommentList";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -196,6 +197,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
         movieId={movie.id}
         seriesId={null ?? 0}
       />
+      <CommentList movieId={movie.id} />
     </div>
   );
 }
