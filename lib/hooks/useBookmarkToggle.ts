@@ -1,7 +1,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { addBookmark } from "@/actions/post/addBookmark";
-import { removeBookmark } from "@/actions/post/removeBookmark";
+import { addBookmark } from "@/actions/bookmarks/addBookmark";
+import { removeBookmark } from "@/actions/bookmarks/removeBookmark";
 import { useBookmarks } from "@/contexts/BookmarkContext";
 
 interface UseBookmarkToggleProps {
