@@ -1,3 +1,5 @@
+"use client";
+
 import { CommentData } from "@/lib/types/types";
 import { getDisplayName, getRelativeTime } from "@/lib/helpers";
 import UserAvatar from "./UserAvatar";

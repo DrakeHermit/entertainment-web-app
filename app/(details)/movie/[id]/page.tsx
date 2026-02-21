@@ -7,6 +7,8 @@ import BookmarkButton from "@/components/BookmarkButton";
 import DetailsBackButton from "@/components/DetailsBackButton";
 import CommentField from "@/components/CommentField";
 import CommentList from "@/components/CommentList";
+import { CommentProvider } from "@/contexts/CommentContext";
+import { getComments } from "@/queries/comments/getComments";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -21,6 +23,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
   }
 
   const userId = (await getUserId()) ?? undefined;
+  const comments = await getComments(movie.id);
 
   const formatCurrency = (amount: number) => {
     if (amount === 0) return "N/A";
@@ -192,12 +195,14 @@ export default async function MovieDetailsPage({ params }: PageProps) {
           )}
         </div>
       </div>
-      <CommentField
-        userId={userId ?? 0}
-        movieId={movie.id}
-        seriesId={null ?? 0}
-      />
-      <CommentList movieId={movie.id} />
+      <CommentProvider initialComments={comments}>
+        <CommentField
+          userId={userId ?? 0}
+          movieId={movie.id}
+          seriesId={null ?? 0}
+        />
+        <CommentList />
+      </CommentProvider>
     </div>
   );
 }

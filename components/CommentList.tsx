@@ -1,14 +1,11 @@
+"use client";
+
 import { MessageCircle } from "lucide-react";
-import { getComments } from "@/queries/comments/getComments";
+import { useComments } from "@/contexts/CommentContext";
 import Comment from "./Comment";
 
-type CommentListProps = {
-  movieId?: number;
-  seriesId?: number;
-};
-
-const CommentList = async ({ movieId, seriesId }: CommentListProps) => {
-  const comments = await getComments(movieId, seriesId);
+const CommentList = () => {
+  const { comments } = useComments();
 
   return (
     <div className="flex justify-center mt-600">

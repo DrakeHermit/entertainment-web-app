@@ -1,22 +1,33 @@
 "use client";
 
 import { postComment } from "@/actions/comments/postComment";
-import { useActionState } from "react";
+import { useComments } from "@/contexts/CommentContext";
+import { useActionState, useRef } from "react";
 
 const CommentField = ({ userId, movieId, seriesId }: { userId: number, movieId: number, seriesId: number }) => {
-  const boundPostComment = async (_prevState: unknown, formData: FormData) => {
-    return postComment(userId, {
+  const { dispatch } = useComments();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmitComment = async (_prevState: unknown, formData: FormData) => {
+    const result = await postComment(userId, {
       movieId,
       seriesId,
       content: formData.get("content") as string,
     });
+
+    if (result.success && result.comment) {
+      dispatch({ type: "ADD_COMMENT", payload: result.comment });
+      formRef.current?.reset();
+    }
+
+    return result;
   };
 
-  const [state, formAction, isPending] = useActionState(boundPostComment, null);
+  const [state, formAction, isPending] = useActionState(handleSubmitComment, null);
 
   return (
     <div className="flex justify-center mt-600">
-      <form action={formAction} className="w-full max-w-2xl">
+      <form ref={formRef} action={formAction} className="w-full max-w-2xl">
         <textarea
           name="content"
           placeholder="Add a comment..."

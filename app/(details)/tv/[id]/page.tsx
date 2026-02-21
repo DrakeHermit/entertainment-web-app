@@ -7,6 +7,8 @@ import BookmarkButton from "@/components/BookmarkButton";
 import DetailsBackButton from "@/components/DetailsBackButton";
 import CommentField from "@/components/CommentField";
 import CommentList from "@/components/CommentList";
+import { CommentProvider } from "@/contexts/CommentContext";
+import { getComments } from "@/queries/comments/getComments";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -21,6 +23,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
   }
 
   const userId = (await getUserId()) ?? undefined;
+  const comments = await getComments(undefined, tvSeries.id);
 
   return (
     <div className="pb-8">
@@ -228,12 +231,14 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
           )}
         </div>
       </div>
-      <CommentField
-        userId={userId ?? 0}
-        movieId={null ?? 0}
-        seriesId={tvSeries.id}
-      />
-      <CommentList seriesId={tvSeries.id} />
+      <CommentProvider initialComments={comments}>
+        <CommentField
+          userId={userId ?? 0}
+          movieId={null ?? 0}
+          seriesId={tvSeries.id}
+        />
+        <CommentList />
+      </CommentProvider>
     </div>
   );
 }
