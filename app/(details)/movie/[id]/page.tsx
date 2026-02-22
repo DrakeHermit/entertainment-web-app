@@ -195,7 +195,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
           )}
         </div>
       </div>
-      <CommentProvider initialComments={comments}>
+      <CommentProvider initialComments={comments} userId={userId ?? 0}>
         <CommentField
           userId={userId ?? 0}
           movieId={movie.id}

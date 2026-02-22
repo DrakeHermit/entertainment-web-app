@@ -4,11 +4,22 @@ import { postComment } from "@/actions/comments/postComment";
 import { useComments } from "@/contexts/CommentContext";
 import { useActionState, useRef } from "react";
 
-const CommentField = ({ userId, movieId, seriesId }: { userId: number, movieId: number, seriesId: number }) => {
+const CommentField = ({
+  userId,
+  movieId,
+  seriesId,
+}: {
+  userId: number;
+  movieId: number;
+  seriesId: number;
+}) => {
   const { dispatch } = useComments();
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleSubmitComment = async (_prevState: unknown, formData: FormData) => {
+  const handleSubmitComment = async (
+    _prevState: unknown,
+    formData: FormData,
+  ) => {
     const result = await postComment(userId, {
       movieId,
       seriesId,
@@ -23,7 +34,10 @@ const CommentField = ({ userId, movieId, seriesId }: { userId: number, movieId: 
     return result;
   };
 
-  const [state, formAction, isPending] = useActionState(handleSubmitComment, null);
+  const [state, formAction, isPending] = useActionState(
+    handleSubmitComment,
+    null,
+  );
 
   return (
     <div className="flex justify-center mt-600">
@@ -42,9 +56,7 @@ const CommentField = ({ userId, movieId, seriesId }: { userId: number, movieId: 
             {isPending ? "Posting..." : "Add Comment"}
           </button>
         </div>
-        {state?.error && (
-          <p className="text-red text-sm mt-2">{state.error}</p>
-        )}
+        {state?.error && <p className="text-red text-sm mt-2">{state.error}</p>}
       </form>
     </div>
   );

@@ -11,24 +11,36 @@ import { CommentData } from "@/lib/types/types";
 
 type CommentState = {
   comments: CommentData[];
+  userId: number;
 };
 
 type CommentAction =
   | { type: "SET_COMMENTS"; payload: CommentData[] }
   | { type: "ADD_COMMENT"; payload: CommentData }
   | { type: "UPDATE_COMMENT"; payload: { id: number; content: string } }
-  | { type: "DELETE_COMMENT"; payload: { id: number } };
+  | { type: "DELETE_COMMENT"; payload: number };
 
-function commentReducer(state: CommentState, action: CommentAction): CommentState {
+function commentReducer(
+  state: CommentState,
+  action: CommentAction,
+): CommentState {
   switch (action.type) {
     case "SET_COMMENTS":
-      return { comments: action.payload };
+      return { comments: action.payload, userId: state.userId };
     case "ADD_COMMENT":
-      return { comments: [action.payload, ...state.comments] };
+      return {
+        comments: [action.payload, ...state.comments],
+        userId: state.userId,
+      };
     case "UPDATE_COMMENT":
       return state;
     case "DELETE_COMMENT":
-      return state;
+      return {
+        comments: state.comments.filter(
+          (comment) => comment.id !== action.payload,
+        ),
+        userId: state.userId,
+      };
     default:
       return state;
   }
@@ -37,6 +49,7 @@ function commentReducer(state: CommentState, action: CommentAction): CommentStat
 interface CommentContextType {
   comments: CommentData[];
   dispatch: Dispatch<CommentAction>;
+  userId: number;
 }
 
 const CommentContext = createContext<CommentContextType | undefined>(undefined);
@@ -44,16 +57,21 @@ const CommentContext = createContext<CommentContextType | undefined>(undefined);
 export function CommentProvider({
   children,
   initialComments,
+  userId,
 }: {
   children: ReactNode;
   initialComments: CommentData[];
+  userId: number;
 }) {
   const [state, dispatch] = useReducer(commentReducer, {
     comments: initialComments,
+    userId,
   });
 
   return (
-    <CommentContext.Provider value={{ comments: state.comments, dispatch }}>
+    <CommentContext.Provider
+      value={{ comments: state.comments, dispatch, userId: state.userId }}
+    >
       {children}
     </CommentContext.Provider>
   );
