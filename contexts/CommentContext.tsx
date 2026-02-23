@@ -33,7 +33,14 @@ function commentReducer(
         userId: state.userId,
       };
     case "UPDATE_COMMENT":
-      return state;
+      return {
+        ...state,
+        comments: state.comments.map((comment) =>
+          comment.id === action.payload.id
+            ? { ...comment, content: action.payload.content }
+            : comment,
+        ),
+      };
     case "DELETE_COMMENT":
       return {
         comments: state.comments.filter(
