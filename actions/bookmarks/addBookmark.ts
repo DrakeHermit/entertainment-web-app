@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { AddBookmarkProps } from "@/lib/types/types";
 import { db } from "@/lib/db/drizzle";
 import { bookmarkedMovies, bookmarkedTvSeries, movies, tvSeries } from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export async function addBookmark(
   userId: number, 
@@ -19,25 +19,20 @@ export async function addBookmark(
 
   try {
     if (category === "Movie") {
-      let existingMovie = await db
-        .select()
-        .from(movies)
-        .where(eq(movies.tmdb_id, id))
-        .limit(1);
-
-      let movieId;
-      if (existingMovie.length === 0) {
-        const newMovie = await db.insert(movies).values({
+      const [movie] = await db
+        .insert(movies)
+        .values({
           tmdb_id: id,
           title: title,
           backdrop_path: thumbnail || "",
           release_date: new Date(year, 0, 1),
           rating: parseFloat(rating),
-        }).returning();
-        movieId = newMovie[0].id;
-      } else {
-        movieId = existingMovie[0].id;
-      }
+        })
+        .onConflictDoUpdate({
+          target: movies.tmdb_id,
+          set: { title: sql`excluded.title` },
+        })
+        .returning({ id: movies.id });
 
       const existingBookmark = await db
         .select()
@@ -45,7 +40,7 @@ export async function addBookmark(
         .where(
           and(
             eq(bookmarkedMovies.user_id, userId),
-            eq(bookmarkedMovies.movie_id, movieId),
+            eq(bookmarkedMovies.movie_id, movie.id),
           )
         )
         .limit(1);
@@ -56,29 +51,24 @@ export async function addBookmark(
 
       await db.insert(bookmarkedMovies).values({
         user_id: userId,
-        movie_id: movieId,
+        movie_id: movie.id,
       });
 
     } else {
-      let existingSeries = await db
-        .select()
-        .from(tvSeries)
-        .where(eq(tvSeries.tmdb_id, id))
-        .limit(1);
-
-      let seriesId;
-      if (existingSeries.length === 0) {
-        const newSeries = await db.insert(tvSeries).values({
+      const [series] = await db
+        .insert(tvSeries)
+        .values({
           tmdb_id: id,
-          name: title, 
+          name: title,
           backdrop_path: thumbnail || "",
           first_air_date: new Date(year, 0, 1),
           rating: parseFloat(rating),
-        }).returning();
-        seriesId = newSeries[0].id;
-      } else {
-        seriesId = existingSeries[0].id;
-      }
+        })
+        .onConflictDoUpdate({
+          target: tvSeries.tmdb_id,
+          set: { name: sql`excluded.name` },
+        })
+        .returning({ id: tvSeries.id });
 
       const existingBookmark = await db
         .select()
@@ -86,7 +76,7 @@ export async function addBookmark(
         .where(
           and(
             eq(bookmarkedTvSeries.user_id, userId),
-            eq(bookmarkedTvSeries.series_id, seriesId),
+            eq(bookmarkedTvSeries.series_id, series.id),
           )
         )
         .limit(1);
@@ -97,7 +87,7 @@ export async function addBookmark(
 
       await db.insert(bookmarkedTvSeries).values({
         user_id: userId,
-        series_id: seriesId,
+        series_id: series.id,
       });
     }
 
