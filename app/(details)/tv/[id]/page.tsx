@@ -234,8 +234,17 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
       <CommentProvider initialComments={comments} userId={userId ?? 0}>
         <CommentField
           userId={userId ?? 0}
-          movieId={null ?? 0}
+          movieId={0}
           seriesId={tvSeries.id}
+          metadata={{
+            tmdbId: tvSeries.id,
+            title: tvSeries.name,
+            backdropPath: tvSeries.backdrop_path
+              ? `https://image.tmdb.org/t/p/w500${tvSeries.backdrop_path}`
+              : "",
+            year: new Date(tvSeries.first_air_date).getFullYear(),
+            rating: tvSeries.vote_average.toFixed(1),
+          }}
         />
         <CommentList />
       </CommentProvider>

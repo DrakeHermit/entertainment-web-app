@@ -135,10 +135,19 @@ export interface User {
   avatar_url: string | null;
 }
 
+export interface MediaMetadata {
+  tmdbId: number;
+  title: string;
+  backdropPath: string;
+  year: number;
+  rating: string;
+}
+
 export interface PostCommentProps {
   movieId: number | null;
   seriesId: number | null;
   content: string;
+  metadata: MediaMetadata;
 }
 
 export interface CommentData {

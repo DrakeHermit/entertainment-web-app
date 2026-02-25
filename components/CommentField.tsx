@@ -2,16 +2,19 @@
 
 import { postComment } from "@/actions/comments/postComment";
 import { useComments } from "@/contexts/CommentContext";
+import { MediaMetadata } from "@/lib/types/types";
 import { useActionState, useRef } from "react";
 
 const CommentField = ({
   userId,
   movieId,
   seriesId,
+  metadata,
 }: {
   userId: number;
   movieId: number;
   seriesId: number;
+  metadata: MediaMetadata;
 }) => {
   const { dispatch } = useComments();
   const formRef = useRef<HTMLFormElement>(null);
@@ -24,6 +27,7 @@ const CommentField = ({
       movieId,
       seriesId,
       content: formData.get("content") as string,
+      metadata,
     });
 
     if (result.success && result.comment) {

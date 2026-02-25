@@ -199,7 +199,16 @@ export default async function MovieDetailsPage({ params }: PageProps) {
         <CommentField
           userId={userId ?? 0}
           movieId={movie.id}
-          seriesId={null ?? 0}
+          seriesId={0}
+          metadata={{
+            tmdbId: movie.id,
+            title: movie.title,
+            backdropPath: movie.backdrop_path
+              ? `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`
+              : "",
+            year: new Date(movie.release_date).getFullYear(),
+            rating: movie.vote_average.toFixed(1),
+          }}
         />
         <CommentList />
       </CommentProvider>
