@@ -1,4 +1,4 @@
-import { integer, text, timestamp, pgTable, real } from "drizzle-orm/pg-core";
+import { integer, text, timestamp, pgTable, real, unique } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -60,3 +60,23 @@ export const tvSeriesComments = pgTable('tv_series_comments', {
   created_at: timestamp().notNull().defaultNow(),
   updated_at: timestamp().notNull().defaultNow(),
 });
+
+export const movieCommentReactions = pgTable('movie_comment_reactions', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  comment_id: integer().notNull().references(() => movieComments.id, { onDelete: 'cascade' }),
+  reaction_type: text().notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+}, (table) => [
+  unique().on(table.user_id, table.comment_id),
+]);
+
+export const tvSeriesCommentReactions = pgTable('tv_series_comment_reactions', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  user_id: integer().notNull().references(() => users.id, { onDelete: 'cascade' }),
+  comment_id: integer().notNull().references(() => tvSeriesComments.id, { onDelete: 'cascade' }),
+  reaction_type: text().notNull(),
+  created_at: timestamp().notNull().defaultNow(),
+}, (table) => [
+  unique().on(table.user_id, table.comment_id),
+]);
