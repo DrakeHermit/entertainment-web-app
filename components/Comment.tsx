@@ -4,6 +4,8 @@ import { CommentData } from "@/lib/types/types";
 import { getDisplayName, getRelativeTime } from "@/lib/helpers";
 import UserAvatar from "./UserAvatar";
 import { SquarePen, Trash2, Check, X } from "lucide-react";
+import LikeButton from "./LikeButton";
+import DislikeButton from "./DislikeButton";
 import { deleteComment } from "@/actions/comments/deleteComment";
 import { useComments } from "@/contexts/CommentContext";
 import { toast } from "sonner";
@@ -103,9 +105,27 @@ const Comment = ({ comment }: { comment: CommentData }) => {
             </div>
           </div>
         ) : (
-          <p className="text-white/80 text-sm leading-relaxed wrap-break-word">
-            {comment.content}
-          </p>
+          <>
+            <p className="text-white/80 text-sm leading-relaxed wrap-break-word">
+              {comment.content}
+            </p>
+            <div className="flex items-center gap-3 mt-2">
+              <LikeButton
+                count={comment.like_count}
+                isActive={comment.user_reaction === "like"}
+                onClick={() => {
+                  console.log("like");
+                }}
+              />
+              <DislikeButton
+                count={comment.dislike_count}
+                isActive={comment.user_reaction === "dislike"}
+                onClick={() => {
+                  console.log("dislike");
+                }}
+              />
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -150,6 +150,8 @@ export interface PostCommentProps {
   metadata: MediaMetadata;
 }
 
+export type ReactionType = 'like' | 'dislike';
+
 export interface CommentData {
   id: number;
   content: string;
@@ -161,4 +163,7 @@ export interface CommentData {
     avatar_url: string | null;
     email: string;
   };
+  like_count: number;
+  dislike_count: number;
+  user_reaction: ReactionType | null;
 }
