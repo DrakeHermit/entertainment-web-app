@@ -11,6 +11,7 @@ import { useComments } from "@/contexts/CommentContext";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import { useEditComment } from "@/lib/hooks/useEditComment";
+import { toggleReaction } from "@/actions/comments/toggleReaction";
 
 const Comment = ({ comment }: { comment: CommentData }) => {
   const displayName = getDisplayName(comment.user.username, comment.user.email);
@@ -44,19 +45,27 @@ const Comment = ({ comment }: { comment: CommentData }) => {
   };
 
   const handleLikeComment = async (commentId: number) => {
-    dispatch({
-      type: "TOGGLE_REACTION",
-      payload: { id: commentId, reaction: "like" },
-    });
-    toast.success("Liked comment");
+    const result = await toggleReaction(userId, commentId, "like", type);
+    if (result.success) {
+      dispatch({
+        type: "TOGGLE_REACTION",
+        payload: { id: commentId, reaction: "like" },
+      });
+    } else {
+      toast.error(result.error || "Something went wrong");
+    }
   };
 
   const handleDislikeComment = async (commentId: number) => {
-    dispatch({
-      type: "TOGGLE_REACTION",
-      payload: { id: commentId, reaction: "dislike" },
-    });
-    toast.success("Disliked comment");
+    const result = await toggleReaction(userId, commentId, "dislike", type);
+    if (result.success) {
+      dispatch({
+        type: "TOGGLE_REACTION",
+        payload: { id: commentId, reaction: "dislike" },
+      });
+    } else {
+      toast.error(result.error || "Something went wrong");
+    }
   };
 
   return (
