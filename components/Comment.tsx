@@ -43,6 +43,22 @@ const Comment = ({ comment }: { comment: CommentData }) => {
     }
   };
 
+  const handleLikeComment = async (commentId: number) => {
+    dispatch({
+      type: "TOGGLE_REACTION",
+      payload: { id: commentId, reaction: "like" },
+    });
+    toast.success("Liked comment");
+  };
+
+  const handleDislikeComment = async (commentId: number) => {
+    dispatch({
+      type: "TOGGLE_REACTION",
+      payload: { id: commentId, reaction: "dislike" },
+    });
+    toast.success("Disliked comment");
+  };
+
   return (
     <div className="flex gap-3 bg-semi-dark-blue p-4 rounded-lg">
       <div className="shrink-0 pt-0.5">
@@ -113,16 +129,12 @@ const Comment = ({ comment }: { comment: CommentData }) => {
               <LikeButton
                 count={comment.like_count}
                 isActive={comment.user_reaction === "like"}
-                onClick={() => {
-                  console.log("like");
-                }}
+                onClick={() => handleLikeComment(comment.id)}
               />
               <DislikeButton
                 count={comment.dislike_count}
                 isActive={comment.user_reaction === "dislike"}
-                onClick={() => {
-                  console.log("dislike");
-                }}
+                onClick={() => handleDislikeComment(comment.id)}
               />
             </div>
           </>

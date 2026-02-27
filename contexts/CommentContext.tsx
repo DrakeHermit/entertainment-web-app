@@ -7,7 +7,7 @@ import {
   Dispatch,
   ReactNode,
 } from "react";
-import { CommentData } from "@/lib/types/types";
+import { CommentData, ReactionType } from "@/lib/types/types";
 
 type CommentState = {
   comments: CommentData[];
@@ -18,7 +18,11 @@ type CommentAction =
   | { type: "SET_COMMENTS"; payload: CommentData[] }
   | { type: "ADD_COMMENT"; payload: CommentData }
   | { type: "UPDATE_COMMENT"; payload: { id: number; content: string } }
-  | { type: "DELETE_COMMENT"; payload: number };
+  | { type: "DELETE_COMMENT"; payload: number }
+  | {
+      type: "TOGGLE_REACTION";
+      payload: { id: number; reaction: ReactionType };
+    };
 
 function commentReducer(
   state: CommentState,
@@ -48,6 +52,41 @@ function commentReducer(
         ),
         userId: state.userId,
       };
+    case "TOGGLE_REACTION": {
+      const { id, reaction } = action.payload;
+      return {
+        ...state,
+        comments: state.comments.map((comment) => {
+          if (comment.id !== id) return comment;
+
+          if (comment.user_reaction === reaction) {
+            return {
+              ...comment,
+              user_reaction: null,
+              like_count: comment.like_count - (reaction === "like" ? 1 : 0),
+              dislike_count:
+                comment.dislike_count - (reaction === "dislike" ? 1 : 0),
+            };
+          }
+
+          const wasLike = comment.user_reaction === "like";
+          const wasDislike = comment.user_reaction === "dislike";
+
+          return {
+            ...comment,
+            user_reaction: reaction,
+            like_count:
+              comment.like_count +
+              (reaction === "like" ? 1 : 0) -
+              (wasLike ? 1 : 0),
+            dislike_count:
+              comment.dislike_count +
+              (reaction === "dislike" ? 1 : 0) -
+              (wasDislike ? 1 : 0),
+          };
+        }),
+      };
+    }
     default:
       return state;
   }
