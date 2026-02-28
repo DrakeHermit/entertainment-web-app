@@ -23,7 +23,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
   }
 
   const userId = (await getUserId()) ?? undefined;
-  const comments = await getComments(undefined, tvSeries.id);
+  const comments = await getComments(undefined, tvSeries.id, userId);
 
   return (
     <div className="pb-8">

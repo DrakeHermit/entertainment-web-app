@@ -1,11 +1,46 @@
 import { db } from "@/lib/db/drizzle";
-import { movieComments, tvSeriesComments, movies, tvSeries, users } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { CommentData } from "@/lib/types/types";
+import {
+  movieComments,
+  tvSeriesComments,
+  movieCommentReactions,
+  tvSeriesCommentReactions,
+  movies,
+  tvSeries,
+  users,
+} from "@/lib/db/schema";
+import { eq, desc, inArray, and } from "drizzle-orm";
+import { CommentData, ReactionType } from "@/lib/types/types";
+
+function includeReactions(
+  comments: Omit<CommentData, "like_count" | "dislike_count" | "user_reaction">[],
+  reactions: { comment_id: number; user_id: number; reaction_type: string }[],
+  userId?: number
+): CommentData[] {
+  const countsByComment = new Map<number, { likes: number; dislikes: number; userReaction: ReactionType | null }>();
+
+  for (const r of reactions) {
+    const entry = countsByComment.get(r.comment_id) ?? { likes: 0, dislikes: 0, userReaction: null };
+    if (r.reaction_type === "like") entry.likes++;
+    else if (r.reaction_type === "dislike") entry.dislikes++;
+    if (userId && r.user_id === userId) entry.userReaction = r.reaction_type as ReactionType;
+    countsByComment.set(r.comment_id, entry);
+  }
+
+  return comments.map((comment) => {
+    const counts = countsByComment.get(comment.id);
+    return {
+      ...comment,
+      like_count: counts?.likes ?? 0,
+      dislike_count: counts?.dislikes ?? 0,
+      user_reaction: counts?.userReaction ?? null,
+    };
+  });
+}
 
 export async function getComments(
   movieId?: number,
-  seriesId?: number
+  seriesId?: number,
+  userId?: number
 ): Promise<CommentData[]> {
   try {
     if (movieId) {
@@ -35,7 +70,19 @@ export async function getComments(
         .where(eq(movieComments.movie_id, movie[0].id))
         .orderBy(desc(movieComments.created_at));
 
-      return results;
+      if (results.length === 0) return [];
+
+      const commentIds = results.map((c) => c.id);
+      const reactions = await db
+        .select({
+          comment_id: movieCommentReactions.comment_id,
+          user_id: movieCommentReactions.user_id,
+          reaction_type: movieCommentReactions.reaction_type,
+        })
+        .from(movieCommentReactions)
+        .where(inArray(movieCommentReactions.comment_id, commentIds));
+
+      return includeReactions(results, reactions, userId);
     }
 
     if (seriesId) {
@@ -65,7 +112,19 @@ export async function getComments(
         .where(eq(tvSeriesComments.series_id, series[0].id))
         .orderBy(desc(tvSeriesComments.created_at));
 
-      return results;
+      if (results.length === 0) return [];
+
+      const commentIds = results.map((c) => c.id);
+      const reactions = await db
+        .select({
+          comment_id: tvSeriesCommentReactions.comment_id,
+          user_id: tvSeriesCommentReactions.user_id,
+          reaction_type: tvSeriesCommentReactions.reaction_type,
+        })
+        .from(tvSeriesCommentReactions)
+        .where(inArray(tvSeriesCommentReactions.comment_id, commentIds));
+
+      return includeReactions(results, reactions, userId);
     }
 
     return [];

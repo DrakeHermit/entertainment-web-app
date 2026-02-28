@@ -23,7 +23,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
   }
 
   const userId = (await getUserId()) ?? undefined;
-  const comments = await getComments(movie.id);
+  const comments = await getComments(movie.id, undefined, userId);
 
   const formatCurrency = (amount: number) => {
     if (amount === 0) return "N/A";
