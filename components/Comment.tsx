@@ -3,7 +3,7 @@
 import { CommentData } from "@/lib/types/types";
 import { getDisplayName, getRelativeTime } from "@/lib/helpers";
 import UserAvatar from "./UserAvatar";
-import { SquarePen, Trash2, Check, X } from "lucide-react";
+import { SquarePen, Trash2, Check, X, Reply } from "lucide-react";
 import LikeButton from "./LikeButton";
 import DislikeButton from "./DislikeButton";
 import { deleteComment } from "@/actions/comments/deleteComment";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import { useEditComment } from "@/lib/hooks/useEditComment";
 import { toggleReaction } from "@/actions/comments/toggleReaction";
+import { useState } from "react";
 
 const Comment = ({ comment }: { comment: CommentData }) => {
   const displayName = getDisplayName(comment.user.username, comment.user.email);
@@ -29,6 +30,8 @@ const Comment = ({ comment }: { comment: CommentData }) => {
     saveEdit,
     handleKeyDown,
   } = useEditComment(comment.id, comment.content);
+
+  const [isReplying, setIsReplying] = useState(false);
 
   const isOwner = userId === comment.user.id;
 
@@ -145,6 +148,13 @@ const Comment = ({ comment }: { comment: CommentData }) => {
                 isActive={comment.user_reaction === "dislike"}
                 onClick={() => handleDislikeComment(comment.id)}
               />
+              <button
+                onClick={() => setIsReplying(!isReplying)}
+                className="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
+              >
+                <Reply className="w-3.5 h-3.5" />
+                Reply
+              </button>
             </div>
           </>
         )}

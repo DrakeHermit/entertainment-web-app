@@ -8,11 +8,11 @@ import {
   tvSeries,
   users,
 } from "@/lib/db/schema";
-import { eq, desc, inArray, and } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 import { CommentData, ReactionType } from "@/lib/types/types";
 
 function includeReactions(
-  comments: Omit<CommentData, "like_count" | "dislike_count" | "user_reaction">[],
+  comments: Omit<CommentData, "like_count" | "dislike_count" | "user_reaction" | "parent_id" | "replies">[],
   reactions: { comment_id: number; user_id: number; reaction_type: string }[],
   userId?: number
 ): CommentData[] {
@@ -30,11 +30,35 @@ function includeReactions(
     const counts = countsByComment.get(comment.id);
     return {
       ...comment,
+      parent_id: null,
+      replies: [],
       like_count: counts?.likes ?? 0,
       dislike_count: counts?.dislikes ?? 0,
       user_reaction: counts?.userReaction ?? null,
     };
   });
+}
+
+function nestReplies(flatComments: Omit<CommentData, "replies">[]): CommentData[] {
+  const topLevel: CommentData[] = [];
+  const repliesByParent = new Map<number, CommentData[]>();
+
+  for (const comment of flatComments) {
+    const withReplies: CommentData = { ...comment, replies: [] };
+    if (comment.parent_id === null) {
+      topLevel.push(withReplies);
+    } else {
+      const list = repliesByParent.get(comment.parent_id) ?? [];
+      list.push(withReplies);
+      repliesByParent.set(comment.parent_id, list);
+    }
+  }
+
+  for (const comment of topLevel) {
+    comment.replies = repliesByParent.get(comment.id) ?? [];
+  }
+
+  return topLevel;
 }
 
 export async function getComments(

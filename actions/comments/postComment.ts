@@ -56,7 +56,7 @@ export async function postComment(
         .innerJoin(users, eq(movieComments.user_id, users.id))
         .where(eq(movieComments.id, inserted.id));
 
-      return { success: true, comment };
+      return { success: true, comment: { ...comment, parent_id: null, replies: [], like_count: 0, dislike_count: 0, user_reaction: null } };
     } else if (seriesId) {
       const [series] = await db
         .insert(tvSeries)
@@ -96,7 +96,7 @@ export async function postComment(
         .innerJoin(users, eq(tvSeriesComments.user_id, users.id))
         .where(eq(tvSeriesComments.id, inserted.id));
 
-      return { success: true, comment };
+      return { success: true, comment: { ...comment, parent_id: null, replies: [], like_count: 0, dislike_count: 0, user_reaction: null } };
     }
 
     return { error: "No movie or series specified" };

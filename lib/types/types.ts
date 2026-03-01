@@ -148,6 +148,7 @@ export interface PostCommentProps {
   seriesId: number | null;
   content: string;
   metadata: MediaMetadata;
+  parentId?: number | null;
 }
 
 export type ReactionType = 'like' | 'dislike';
@@ -157,6 +158,7 @@ export interface CommentData {
   content: string;
   created_at: Date;
   updated_at: Date;
+  parent_id: number | null;
   user: {
     id: number;
     username: string | null;
@@ -166,4 +168,5 @@ export interface CommentData {
   like_count: number;
   dislike_count: number;
   user_reaction: ReactionType | null;
+  replies: CommentData[];
 }
