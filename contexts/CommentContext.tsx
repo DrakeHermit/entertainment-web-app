@@ -17,12 +17,34 @@ type CommentState = {
 type CommentAction =
   | { type: "SET_COMMENTS"; payload: CommentData[] }
   | { type: "ADD_COMMENT"; payload: CommentData }
+  | { type: "ADD_REPLY"; payload: { parentId: number; reply: CommentData } }
   | { type: "UPDATE_COMMENT"; payload: { id: number; content: string } }
   | { type: "DELETE_COMMENT"; payload: number }
   | {
       type: "TOGGLE_REACTION";
       payload: { id: number; reaction: ReactionType };
     };
+
+function applyReaction(comment: CommentData, reaction: ReactionType): CommentData {
+  if (comment.user_reaction === reaction) {
+    return {
+      ...comment,
+      user_reaction: null,
+      like_count: comment.like_count - (reaction === "like" ? 1 : 0),
+      dislike_count: comment.dislike_count - (reaction === "dislike" ? 1 : 0),
+    };
+  }
+
+  const wasLike = comment.user_reaction === "like";
+  const wasDislike = comment.user_reaction === "dislike";
+
+  return {
+    ...comment,
+    user_reaction: reaction,
+    like_count: comment.like_count + (reaction === "like" ? 1 : 0) - (wasLike ? 1 : 0),
+    dislike_count: comment.dislike_count + (reaction === "dislike" ? 1 : 0) - (wasDislike ? 1 : 0),
+  };
+}
 
 function commentReducer(
   state: CommentState,
@@ -36,53 +58,57 @@ function commentReducer(
         comments: [action.payload, ...state.comments],
         userId: state.userId,
       };
-    case "UPDATE_COMMENT":
+    case "ADD_REPLY": {
+      const { parentId, reply } = action.payload;
       return {
         ...state,
         comments: state.comments.map((comment) =>
-          comment.id === action.payload.id
-            ? { ...comment, content: action.payload.content }
+          comment.id === parentId
+            ? { ...comment, replies: [...comment.replies, reply] }
             : comment,
         ),
       };
+    }
+    case "UPDATE_COMMENT":
+      return {
+        ...state,
+        comments: state.comments.map((comment) => {
+          if (comment.id === action.payload.id) {
+            return { ...comment, content: action.payload.content };
+          }
+          return {
+            ...comment,
+            replies: comment.replies.map((reply) =>
+              reply.id === action.payload.id
+                ? { ...reply, content: action.payload.content }
+                : reply,
+            ),
+          };
+        }),
+      };
     case "DELETE_COMMENT":
       return {
-        comments: state.comments.filter(
-          (comment) => comment.id !== action.payload,
-        ),
-        userId: state.userId,
+        ...state,
+        comments: state.comments
+          .filter((comment) => comment.id !== action.payload)
+          .map((comment) => ({
+            ...comment,
+            replies: comment.replies.filter(
+              (reply) => reply.id !== action.payload,
+            ),
+          })),
       };
     case "TOGGLE_REACTION": {
       const { id, reaction } = action.payload;
       return {
         ...state,
         comments: state.comments.map((comment) => {
-          if (comment.id !== id) return comment;
-
-          if (comment.user_reaction === reaction) {
-            return {
-              ...comment,
-              user_reaction: null,
-              like_count: comment.like_count - (reaction === "like" ? 1 : 0),
-              dislike_count:
-                comment.dislike_count - (reaction === "dislike" ? 1 : 0),
-            };
-          }
-
-          const wasLike = comment.user_reaction === "like";
-          const wasDislike = comment.user_reaction === "dislike";
-
+          if (comment.id === id) return applyReaction(comment, reaction);
           return {
             ...comment,
-            user_reaction: reaction,
-            like_count:
-              comment.like_count +
-              (reaction === "like" ? 1 : 0) -
-              (wasLike ? 1 : 0),
-            dislike_count:
-              comment.dislike_count +
-              (reaction === "dislike" ? 1 : 0) -
-              (wasDislike ? 1 : 0),
+            replies: comment.replies.map((reply) =>
+              reply.id === id ? applyReaction(reply, reaction) : reply,
+            ),
           };
         }),
       };
