@@ -7,7 +7,7 @@ import {
   Dispatch,
   ReactNode,
 } from "react";
-import { CommentData, ReactionType } from "@/lib/types/types";
+import { CommentData, MediaMetadata, ReactionType } from "@/lib/types/types";
 
 type CommentState = {
   comments: CommentData[];
@@ -122,6 +122,9 @@ interface CommentContextType {
   comments: CommentData[];
   dispatch: Dispatch<CommentAction>;
   userId: number;
+  movieId: number;
+  seriesId: number;
+  metadata: MediaMetadata;
 }
 
 const CommentContext = createContext<CommentContextType | undefined>(undefined);
@@ -130,10 +133,16 @@ export function CommentProvider({
   children,
   initialComments,
   userId,
+  movieId,
+  seriesId,
+  metadata,
 }: {
   children: ReactNode;
   initialComments: CommentData[];
   userId: number;
+  movieId: number;
+  seriesId: number;
+  metadata: MediaMetadata;
 }) {
   const [state, dispatch] = useReducer(commentReducer, {
     comments: initialComments,
@@ -142,7 +151,7 @@ export function CommentProvider({
 
   return (
     <CommentContext.Provider
-      value={{ comments: state.comments, dispatch, userId: state.userId }}
+      value={{ comments: state.comments, dispatch, userId: state.userId, movieId, seriesId, metadata }}
     >
       {children}
     </CommentContext.Provider>

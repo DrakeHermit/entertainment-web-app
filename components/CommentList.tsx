@@ -7,6 +7,11 @@ import Comment from "./Comment";
 const CommentList = () => {
   const { comments } = useComments();
 
+  const totalCount = comments.reduce(
+    (sum, c) => sum + 1 + c.replies.length,
+    0,
+  );
+
   return (
     <div className="flex justify-center mt-600">
       <div className="w-full max-w-2xl">
@@ -14,9 +19,9 @@ const CommentList = () => {
           <MessageCircle className="w-5 h-5 text-white" />
           <h2 className="text-xl font-semibold text-white">
             Comments
-            {comments.length > 0 && (
+            {totalCount > 0 && (
               <span className="text-white/50 ml-2 text-base font-normal">
-                ({comments.length})
+                ({totalCount})
               </span>
             )}
           </h2>
