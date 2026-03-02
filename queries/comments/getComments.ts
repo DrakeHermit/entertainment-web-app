@@ -12,10 +12,10 @@ import { eq, desc, inArray } from "drizzle-orm";
 import { CommentData, ReactionType } from "@/lib/types/types";
 
 function includeReactions(
-  comments: Omit<CommentData, "like_count" | "dislike_count" | "user_reaction" | "parent_id" | "replies">[],
+  comments: Omit<CommentData, "like_count" | "dislike_count" | "user_reaction" | "replies">[],
   reactions: { comment_id: number; user_id: number; reaction_type: string }[],
   userId?: number
-): CommentData[] {
+): Omit<CommentData, "replies">[] {
   const countsByComment = new Map<number, { likes: number; dislikes: number; userReaction: ReactionType | null }>();
 
   for (const r of reactions) {
@@ -30,8 +30,6 @@ function includeReactions(
     const counts = countsByComment.get(comment.id);
     return {
       ...comment,
-      parent_id: null,
-      replies: [],
       like_count: counts?.likes ?? 0,
       dislike_count: counts?.dislikes ?? 0,
       user_reaction: counts?.userReaction ?? null,
@@ -82,6 +80,7 @@ export async function getComments(
           content: movieComments.content,
           created_at: movieComments.created_at,
           updated_at: movieComments.updated_at,
+          parent_id: movieComments.parent_id,
           user: {
             id: users.id,
             username: users.username,
@@ -106,7 +105,7 @@ export async function getComments(
         .from(movieCommentReactions)
         .where(inArray(movieCommentReactions.comment_id, commentIds));
 
-      return includeReactions(results, reactions, userId);
+      return nestReplies(includeReactions(results, reactions, userId));
     }
 
     if (seriesId) {
@@ -124,6 +123,7 @@ export async function getComments(
           content: tvSeriesComments.content,
           created_at: tvSeriesComments.created_at,
           updated_at: tvSeriesComments.updated_at,
+          parent_id: tvSeriesComments.parent_id,
           user: {
             id: users.id,
             username: users.username,
@@ -148,7 +148,7 @@ export async function getComments(
         .from(tvSeriesCommentReactions)
         .where(inArray(tvSeriesCommentReactions.comment_id, commentIds));
 
-      return includeReactions(results, reactions, userId);
+      return nestReplies(includeReactions(results, reactions, userId));
     }
 
     return [];

@@ -8,7 +8,7 @@ import { eq, sql } from "drizzle-orm";
 
 export async function postComment(
   userId: number,
-  { movieId, seriesId, content, metadata }: PostCommentProps
+  { movieId, seriesId, content, metadata, parentId }: PostCommentProps
 ): Promise<{ success?: boolean; error?: string; comment?: CommentData }> {
   const cookieStore = await cookies();
   const token = cookieStore.get("token");
@@ -36,6 +36,7 @@ export async function postComment(
       const [inserted] = await db.insert(movieComments).values({
         user_id: userId,
         movie_id: movie.id,
+        parent_id: parentId ?? null,
         content: content,
       }).returning();
 
@@ -45,6 +46,7 @@ export async function postComment(
           content: movieComments.content,
           created_at: movieComments.created_at,
           updated_at: movieComments.updated_at,
+          parent_id: movieComments.parent_id,
           user: {
             id: users.id,
             username: users.username,
@@ -56,7 +58,7 @@ export async function postComment(
         .innerJoin(users, eq(movieComments.user_id, users.id))
         .where(eq(movieComments.id, inserted.id));
 
-      return { success: true, comment: { ...comment, parent_id: null, replies: [], like_count: 0, dislike_count: 0, user_reaction: null } };
+      return { success: true, comment: { ...comment, replies: [], like_count: 0, dislike_count: 0, user_reaction: null } };
     } else if (seriesId) {
       const [series] = await db
         .insert(tvSeries)
@@ -76,6 +78,7 @@ export async function postComment(
       const [inserted] = await db.insert(tvSeriesComments).values({
         user_id: userId,
         series_id: series.id,
+        parent_id: parentId ?? null,
         content: content,
       }).returning();
 
@@ -85,6 +88,7 @@ export async function postComment(
           content: tvSeriesComments.content,
           created_at: tvSeriesComments.created_at,
           updated_at: tvSeriesComments.updated_at,
+          parent_id: tvSeriesComments.parent_id,
           user: {
             id: users.id,
             username: users.username,
@@ -96,7 +100,7 @@ export async function postComment(
         .innerJoin(users, eq(tvSeriesComments.user_id, users.id))
         .where(eq(tvSeriesComments.id, inserted.id));
 
-      return { success: true, comment: { ...comment, parent_id: null, replies: [], like_count: 0, dislike_count: 0, user_reaction: null } };
+      return { success: true, comment: { ...comment, replies: [], like_count: 0, dislike_count: 0, user_reaction: null } };
     }
 
     return { error: "No movie or series specified" };
