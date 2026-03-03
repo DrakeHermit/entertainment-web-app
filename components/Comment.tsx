@@ -3,17 +3,149 @@
 import { CommentData } from "@/lib/types/types";
 import { getDisplayName, getRelativeTime } from "@/lib/helpers";
 import UserAvatar from "./UserAvatar";
-import { SquarePen, Trash2, Check, X, Reply } from "lucide-react";
+import { SquarePen, Trash2, Check, X, Reply, ChevronDown, ChevronUp } from "lucide-react";
 import LikeButton from "./LikeButton";
 import DislikeButton from "./DislikeButton";
 import { deleteComment } from "@/actions/comments/deleteComment";
-import { postComment } from "@/actions/comments/postComment";
 import { useComments } from "@/contexts/CommentContext";
 import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import { useEditComment } from "@/lib/hooks/useEditComment";
+import { useReplyComment } from "@/lib/hooks/useReplyComment";
 import { toggleReaction } from "@/actions/comments/toggleReaction";
-import { useState, useRef } from "react";
+import { useState, RefObject } from "react";
+
+const EditForm = ({
+  textareaRef,
+  editContent,
+  setEditContent,
+  handleKeyDown,
+  isSaving,
+  cancelEdit,
+  saveEdit,
+}: {
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+  editContent: string;
+  setEditContent: (value: string) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  isSaving: boolean;
+  cancelEdit: () => void;
+  saveEdit: () => void;
+}) => (
+  <div className="flex flex-col gap-2">
+    <textarea
+      ref={textareaRef}
+      value={editContent}
+      onChange={(e) => setEditContent(e.target.value)}
+      onKeyDown={handleKeyDown}
+      disabled={isSaving}
+      rows={3}
+      className="w-full bg-dark-blue text-white text-sm rounded-md p-3 border border-white/20 focus:border-red focus:outline-none resize-none transition-colors disabled:opacity-50"
+    />
+    <div className="flex items-center gap-2 justify-end">
+      <button
+        onClick={cancelEdit}
+        disabled={isSaving}
+        className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+      >
+        <X className="w-3.5 h-3.5" />
+        Cancel
+      </button>
+      <button
+        onClick={saveEdit}
+        disabled={isSaving || !editContent.trim()}
+        className="flex items-center gap-1.5 bg-red hover:bg-red/80 text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+      >
+        <Check className="w-3.5 h-3.5" />
+        {isSaving ? "Saving..." : "Save"}
+      </button>
+    </div>
+  </div>
+);
+
+const ReplyForm = ({ commentId }: { commentId: number }) => {
+  const {
+    isOpen,
+    replyContent,
+    isPostingReply,
+    textareaRef,
+    setReplyContent,
+    openReply,
+    cancelReply,
+    submitReply,
+    handleKeyDown,
+  } = useReplyComment(commentId);
+
+  return (
+    <>
+      <button
+        onClick={openReply}
+        className="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
+      >
+        <Reply className="w-3.5 h-3.5" />
+        Reply
+      </button>
+
+      {isOpen && (
+        <div className="flex flex-col gap-2 mt-3">
+          <textarea
+            ref={textareaRef}
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isPostingReply}
+            rows={2}
+            placeholder="Write a reply..."
+            className="w-full bg-dark-blue text-white text-sm rounded-md p-3 border border-white/20 focus:border-red focus:outline-none resize-none transition-colors disabled:opacity-50 placeholder-white/50"
+          />
+          <div className="flex items-center gap-2 justify-end">
+            <button
+              onClick={cancelReply}
+              disabled={isPostingReply}
+              className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+            >
+              <X className="w-3.5 h-3.5" />
+              Cancel
+            </button>
+            <button
+              onClick={submitReply}
+              disabled={isPostingReply || !replyContent.trim()}
+              className="flex items-center gap-1.5 bg-red hover:bg-red/80 text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+            >
+              <Reply className="w-3.5 h-3.5" />
+              {isPostingReply ? "Posting..." : "Reply"}
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+const CommentReplies = ({ replies }: { replies: CommentData[] }) => {
+  const [showReplies, setShowReplies] = useState(false);
+
+  if (replies.length === 0) return null;
+
+  return (
+    <div className="mt-1 ml-8">
+      <button
+        onClick={() => setShowReplies(!showReplies)}
+        className="flex items-center gap-1.5 text-red hover:text-red/80 text-xs font-semibold transition-colors cursor-pointer py-1"
+      >
+        {showReplies ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        {showReplies ? "Hide" : "Show"} {replies.length} {replies.length === 1 ? "reply" : "replies"}
+      </button>
+      {showReplies && (
+        <div className="flex flex-col gap-2">
+          {replies.map((reply) => (
+            <Comment key={reply.id} comment={reply} isReply />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Comment = ({
   comment,
@@ -23,7 +155,7 @@ const Comment = ({
   isReply?: boolean;
 }) => {
   const displayName = getDisplayName(comment.user.username, comment.user.email);
-  const { dispatch, userId, movieId, seriesId, metadata } = useComments();
+  const { dispatch, userId } = useComments();
   const type = usePathname().split("/")[1] as "movie" | "tv";
 
   const {
@@ -38,82 +170,38 @@ const Comment = ({
     handleKeyDown,
   } = useEditComment(comment.id, comment.content);
 
-  const [isReplying, setIsReplying] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  const [isPostingReply, setIsPostingReply] = useState(false);
-  const replyTextareaRef = useRef<HTMLTextAreaElement>(null);
-
   const isOwner = userId === comment.user.id;
 
-  const handleDeleteComment = async (
-    commentId: number,
-    type: "movie" | "tv",
-  ) => {
-    const result = await deleteComment(userId, commentId, type);
+  const handleDeleteComment = async () => {
+    const result = await deleteComment(userId, comment.id, type);
     if (result.success) {
-      dispatch({ type: "DELETE_COMMENT", payload: commentId });
+      dispatch({ type: "DELETE_COMMENT", payload: comment.id });
     } else {
       toast.error(result.error || "Something went wrong");
     }
   };
 
-  const handleLikeComment = async (commentId: number) => {
-    const result = await toggleReaction(userId, commentId, "like", type);
+  const handleLikeComment = async () => {
+    const result = await toggleReaction(userId, comment.id, "like", type);
     if (result.success) {
       dispatch({
         type: "TOGGLE_REACTION",
-        payload: { id: commentId, reaction: "like" },
+        payload: { id: comment.id, reaction: "like" },
       });
     } else {
       toast.error(result.error || "Something went wrong");
     }
   };
 
-  const handleDislikeComment = async (commentId: number) => {
-    const result = await toggleReaction(userId, commentId, "dislike", type);
+  const handleDislikeComment = async () => {
+    const result = await toggleReaction(userId, comment.id, "dislike", type);
     if (result.success) {
       dispatch({
         type: "TOGGLE_REACTION",
-        payload: { id: commentId, reaction: "dislike" },
+        payload: { id: comment.id, reaction: "dislike" },
       });
     } else {
       toast.error(result.error || "Something went wrong");
-    }
-  };
-
-  const handleReply = async () => {
-    if (!replyContent.trim()) return;
-
-    setIsPostingReply(true);
-    const result = await postComment(userId, {
-      movieId: movieId || null,
-      seriesId: seriesId || null,
-      content: replyContent,
-      metadata,
-      parentId: comment.id,
-    });
-
-    if (result.success && result.comment) {
-      dispatch({
-        type: "ADD_REPLY",
-        payload: { parentId: comment.id, reply: result.comment },
-      });
-      setReplyContent("");
-      setIsReplying(false);
-    } else {
-      toast.error(result.error || "Something went wrong");
-    }
-    setIsPostingReply(false);
-  };
-
-  const handleReplyKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleReply();
-    }
-    if (e.key === "Escape") {
-      setIsReplying(false);
-      setReplyContent("");
     }
   };
 
@@ -140,9 +228,7 @@ const Comment = ({
                   className="w-4 h-4 text-white cursor-pointer hover:text-red transition-colors"
                 />
                 <Trash2
-                  onClick={() =>
-                    handleDeleteComment(comment.id, type as "movie" | "tv")
-                  }
+                  onClick={handleDeleteComment}
                   className="w-4 h-4 text-white cursor-pointer hover:text-red transition-colors"
                 />
               </div>
@@ -150,35 +236,15 @@ const Comment = ({
           </div>
 
           {isEditing ? (
-            <div className="flex flex-col gap-2">
-              <textarea
-                ref={textareaRef}
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isSaving}
-                rows={3}
-                className="w-full bg-dark-blue text-white text-sm rounded-md p-3 border border-white/20 focus:border-red focus:outline-none resize-none transition-colors disabled:opacity-50"
-              />
-              <div className="flex items-center gap-2 justify-end">
-                <button
-                  onClick={cancelEdit}
-                  disabled={isSaving}
-                  className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  Cancel
-                </button>
-                <button
-                  onClick={saveEdit}
-                  disabled={isSaving || !editContent.trim()}
-                  className="flex items-center gap-1.5 bg-red hover:bg-red/80 text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
-                >
-                  <Check className="w-3.5 h-3.5" />
-                  {isSaving ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </div>
+            <EditForm
+              textareaRef={textareaRef}
+              editContent={editContent}
+              setEditContent={setEditContent}
+              handleKeyDown={handleKeyDown}
+              isSaving={isSaving}
+              cancelEdit={cancelEdit}
+              saveEdit={saveEdit}
+            />
           ) : (
             <>
               <p className="text-white/80 text-sm leading-relaxed wrap-break-word">
@@ -188,74 +254,21 @@ const Comment = ({
                 <LikeButton
                   count={comment.like_count}
                   isActive={comment.user_reaction === "like"}
-                  onClick={() => handleLikeComment(comment.id)}
+                  onClick={handleLikeComment}
                 />
                 <DislikeButton
                   count={comment.dislike_count}
                   isActive={comment.user_reaction === "dislike"}
-                  onClick={() => handleDislikeComment(comment.id)}
+                  onClick={handleDislikeComment}
                 />
-                {!isReply && (
-                  <button
-                    onClick={() => {
-                      setIsReplying(!isReplying);
-                      setTimeout(() => replyTextareaRef.current?.focus(), 0);
-                    }}
-                    className="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
-                  >
-                    <Reply className="w-3.5 h-3.5" />
-                    Reply
-                  </button>
-                )}
+                {!isReply && <ReplyForm commentId={comment.id} />}
               </div>
             </>
-          )}
-
-          {isReplying && (
-            <div className="flex flex-col gap-2 mt-3">
-              <textarea
-                ref={replyTextareaRef}
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                onKeyDown={handleReplyKeyDown}
-                disabled={isPostingReply}
-                rows={2}
-                placeholder="Write a reply..."
-                className="w-full bg-dark-blue text-white text-sm rounded-md p-3 border border-white/20 focus:border-red focus:outline-none resize-none transition-colors disabled:opacity-50 placeholder-white/50"
-              />
-              <div className="flex items-center gap-2 justify-end">
-                <button
-                  onClick={() => {
-                    setIsReplying(false);
-                    setReplyContent("");
-                  }}
-                  disabled={isPostingReply}
-                  className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
-                >
-                  <X className="w-3.5 h-3.5" />
-                  Cancel
-                </button>
-                <button
-                  onClick={handleReply}
-                  disabled={isPostingReply || !replyContent.trim()}
-                  className="flex items-center gap-1.5 bg-red hover:bg-red/80 text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
-                >
-                  <Reply className="w-3.5 h-3.5" />
-                  {isPostingReply ? "Posting..." : "Reply"}
-                </button>
-              </div>
-            </div>
           )}
         </div>
       </div>
 
-      {!isReply && comment.replies.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {comment.replies.map((reply) => (
-            <Comment key={reply.id} comment={reply} isReply />
-          ))}
-        </div>
-      )}
+      {!isReply && <CommentReplies replies={comment.replies} />}
     </div>
   );
 };
