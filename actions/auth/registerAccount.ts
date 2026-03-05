@@ -7,38 +7,59 @@ import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { ActionState } from "@/lib/types/types";
+import { registerSchema, flattenFieldErrors } from "@/lib/validations/auth";
 
 export async function registerAccount(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  const email = formData.get("email") as string;
-  const username = formData.get("username") as string;
-  const password = formData.get("password") as string;
+  const raw = {
+    email: formData.get("email") as string,
+    username: formData.get("username") as string,
+    password: formData.get("password") as string,
+    confirmPassword: formData.get("confirmPassword") as string,
+  };
+
+  const result = registerSchema.safeParse(raw);
+
+  if (!result.success) {
+    return {
+      error: "Validation failed",
+      fieldErrors: flattenFieldErrors(result.error),
+    };
+  }
+
+  const { email, username, password } = result.data;
   const avatarUrl = formData.get("avatarUrl") as string | null;
 
-  if (!email || !password) {
-    return { error: "Email and password are required" };
-  }
-  
-  const userExists = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const userExists = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
   if (userExists[0]) {
     return { error: "User already exists", success: false };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  
+
   try {
-    const user = await db.insert(users).values({
-      email,
-      username: username || null,
-      password: hashedPassword,
-      avatar_url: avatarUrl || null,
-    }).returning();
+    const user = await db
+      .insert(users)
+      .values({
+        email,
+        username: username || null,
+        password: hashedPassword,
+        avatar_url: avatarUrl || null,
+      })
+      .returning();
 
     const token = generateToken(user[0].id.toString());
-    
-    await db.update(users).set({ jwt_token: token }).where(eq(users.id, user[0].id));
+
+    await db
+      .update(users)
+      .set({ jwt_token: token })
+      .where(eq(users.id, user[0].id));
 
     const cookieStore = await cookies();
     cookieStore.set("token", token, {
@@ -48,7 +69,7 @@ export async function registerAccount(
       maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
       path: "/",
     });
-    
+
     return { error: null, success: true };
   } catch (error) {
     console.error(error);

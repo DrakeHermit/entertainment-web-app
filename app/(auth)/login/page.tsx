@@ -5,20 +5,26 @@ import { loginAccount } from "@/actions/auth/loginAccount";
 import { useActionState, useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import { loginSchema, flattenFieldErrors } from "@/lib/validations/auth";
 
 const LoginPage = () => {
   const [state, formAction, isPending] = useActionState(loginAccount, {
     error: null,
   });
-  const [clientError, setClientError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = (formData: FormData) => {
-    setClientError(null);
+    setFieldErrors({});
 
-    if (!email || !password) {
-      setClientError("All fields are required");
+    const result = loginSchema.safeParse({
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      setFieldErrors(flattenFieldErrors(result.error));
       return;
     }
 
@@ -27,15 +33,10 @@ const LoginPage = () => {
     setPassword("");
   };
 
-  const error = clientError || state.error;
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
-  };
+  const serverFieldErrors = state.fieldErrors ?? {};
+  const mergedErrors = { ...serverFieldErrors, ...fieldErrors };
+  const generalError =
+    state.error && !state.fieldErrors ? state.error : null;
 
   useEffect(() => {
     if (state.success) {
@@ -61,22 +62,28 @@ const LoginPage = () => {
             type="email"
             name="email"
             value={email}
-            onChange={handleEmailChange}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="Email address"
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors"
           />
+          {mergedErrors.email && (
+            <p className="text-red text-xs mt-1">{mergedErrors.email}</p>
+          )}
         </div>
         <div className="relative">
           <input
             type="password"
             name="password"
             value={password}
-            onChange={handlePasswordChange}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors"
           />
+          {mergedErrors.password && (
+            <p className="text-red text-xs mt-1">{mergedErrors.password}</p>
+          )}
         </div>
-        {error && <p className="text-red text-sm">{error}</p>}
+        {generalError && <p className="text-red text-sm">{generalError}</p>}
         <button
           type="submit"
           disabled={isPending}

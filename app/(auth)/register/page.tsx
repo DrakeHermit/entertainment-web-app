@@ -5,10 +5,12 @@ import { registerAccount } from "@/actions/auth/registerAccount";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { registerSchema, flattenFieldErrors } from "@/lib/validations/auth";
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,13 +30,15 @@ const RegisterPage = () => {
         "image/webp",
       ];
       if (!validTypes.includes(file.type)) {
-        setError("Please select a valid image file (JPEG, PNG, GIF, or WebP)");
+        setGeneralError(
+          "Please select a valid image file (JPEG, PNG, GIF, or WebP)"
+        );
         return;
       }
 
       const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        setError("Image size must be less than 5MB");
+        setGeneralError("Image size must be less than 5MB");
         return;
       }
 
@@ -45,23 +49,25 @@ const RegisterPage = () => {
         setAvatarPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-      setError(null);
+      setGeneralError(null);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setGeneralError(null);
+    setFieldErrors({});
     setIsSubmitting(true);
 
-    if (!email || !password || !confirmPassword) {
-      setError("All fields are required");
-      setIsSubmitting(false);
-      return;
-    }
+    const result = registerSchema.safeParse({
+      email,
+      username,
+      password,
+      confirmPassword,
+    });
 
-    if (password !== confirmPassword) {
-      setError("Passwords don't match");
+    if (!result.success) {
+      setFieldErrors(flattenFieldErrors(result.error));
       setIsSubmitting(false);
       return;
     }
@@ -81,7 +87,7 @@ const RegisterPage = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          setError(data.error || "Failed to upload avatar");
+          setGeneralError(data.error || "Failed to upload avatar");
           setIsSubmitting(false);
           return;
         }
@@ -90,24 +96,31 @@ const RegisterPage = () => {
       }
 
       const formData = new FormData();
-      formData.append("email", email);
-      formData.append("username", username);
-      formData.append("password", password);
+      formData.append("email", result.data.email);
+      formData.append("username", result.data.username ?? "");
+      formData.append("password", result.data.password);
+      formData.append("confirmPassword", result.data.confirmPassword);
       if (avatarUrl) {
         formData.append("avatarUrl", avatarUrl);
       }
 
-      const result = await registerAccount({ error: null }, formData);
+      const serverResult = await registerAccount({ error: null }, formData);
 
-      if (result.error) {
-        setError(result.error);
+      if (serverResult.fieldErrors) {
+        setFieldErrors(serverResult.fieldErrors);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (serverResult.error) {
+        setGeneralError(serverResult.error);
         setIsSubmitting(false);
         return;
       }
 
       router.push("/");
-    } catch (error) {
-      setError("An unexpected error occurred. Please try again.");
+    } catch {
+      setGeneralError("An unexpected error occurred. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -127,6 +140,9 @@ const RegisterPage = () => {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors focus:ring-0"
           />
+          {fieldErrors.email && (
+            <p className="text-red text-xs mt-1">{fieldErrors.email}</p>
+          )}
         </div>
         <div className="relative">
           <input
@@ -137,6 +153,9 @@ const RegisterPage = () => {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors"
           />
+          {fieldErrors.username && (
+            <p className="text-red text-xs mt-1">{fieldErrors.username}</p>
+          )}
         </div>
         <div className="relative">
           <label className="block text-white/70 text-sm mb-2">
@@ -176,6 +195,9 @@ const RegisterPage = () => {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors"
           />
+          {fieldErrors.password && (
+            <p className="text-red text-xs mt-1">{fieldErrors.password}</p>
+          )}
         </div>
         <div className="relative">
           <input
@@ -186,8 +208,13 @@ const RegisterPage = () => {
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full bg-transparent text-white placeholder-white/50 border-b border-white/30 pb-4 pl-4 focus:border-white focus:outline-none caret-red transition-colors"
           />
+          {fieldErrors.confirmPassword && (
+            <p className="text-red text-xs mt-1">
+              {fieldErrors.confirmPassword}
+            </p>
+          )}
         </div>
-        {error && <p className="text-red text-sm">{error}</p>}
+        {generalError && <p className="text-red text-sm">{generalError}</p>}
         <button
           type="submit"
           disabled={isSubmitting}

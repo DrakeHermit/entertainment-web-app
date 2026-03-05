@@ -116,6 +116,7 @@ export interface TVSeriesDetails {
 
 export type ActionState = {
   error: string | null;
+  fieldErrors?: Record<string, string>;
   success?: boolean;
 };
 
