@@ -63,64 +63,54 @@ const EditForm = ({
   </div>
 );
 
-const ReplyForm = ({ commentId }: { commentId: number }) => {
-  const {
-    isOpen,
-    replyContent,
-    isPostingReply,
-    textareaRef,
-    setReplyContent,
-    openReply,
-    cancelReply,
-    submitReply,
-    handleKeyDown,
-  } = useReplyComment(commentId);
-
-  return (
-    <>
+const ReplyFormBody = ({
+  replyContent,
+  isPostingReply,
+  textareaRef,
+  setReplyContent,
+  cancelReply,
+  submitReply,
+  handleKeyDown,
+}: {
+  replyContent: string;
+  isPostingReply: boolean;
+  textareaRef: RefObject<HTMLTextAreaElement | null>;
+  setReplyContent: (value: string) => void;
+  cancelReply: () => void;
+  submitReply: () => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+}) => (
+  <div className="flex flex-col gap-2 mt-3 ml-8">
+    <textarea
+      ref={textareaRef}
+      value={replyContent}
+      onChange={(e) => setReplyContent(e.target.value)}
+      onKeyDown={handleKeyDown}
+      disabled={isPostingReply}
+      rows={2}
+      placeholder="Write a reply..."
+      className="w-full bg-dark-blue text-white text-sm rounded-md p-3 border border-white/20 focus:border-red focus:outline-none resize-none transition-colors disabled:opacity-50 placeholder-white/50"
+    />
+    <div className="flex items-center gap-2 justify-end">
       <button
-        onClick={openReply}
-        className="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
+        onClick={cancelReply}
+        disabled={isPostingReply}
+        className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+      >
+        <X className="w-3.5 h-3.5" />
+        Cancel
+      </button>
+      <button
+        onClick={submitReply}
+        disabled={isPostingReply || !replyContent.trim()}
+        className="flex items-center gap-1.5 bg-red hover:bg-red/80 text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
       >
         <Reply className="w-3.5 h-3.5" />
-        Reply
+        {isPostingReply ? "Posting..." : "Reply"}
       </button>
-
-      {isOpen && (
-        <div className="flex flex-col gap-2 mt-3">
-          <textarea
-            ref={textareaRef}
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isPostingReply}
-            rows={2}
-            placeholder="Write a reply..."
-            className="w-full bg-dark-blue text-white text-sm rounded-md p-3 border border-white/20 focus:border-red focus:outline-none resize-none transition-colors disabled:opacity-50 placeholder-white/50"
-          />
-          <div className="flex items-center gap-2 justify-end">
-            <button
-              onClick={cancelReply}
-              disabled={isPostingReply}
-              className="flex items-center gap-1.5 text-white/60 hover:text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
-            >
-              <X className="w-3.5 h-3.5" />
-              Cancel
-            </button>
-            <button
-              onClick={submitReply}
-              disabled={isPostingReply || !replyContent.trim()}
-              className="flex items-center gap-1.5 bg-red hover:bg-red/80 text-white text-xs px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
-            >
-              <Reply className="w-3.5 h-3.5" />
-              {isPostingReply ? "Posting..." : "Reply"}
-            </button>
-          </div>
-        </div>
-      )}
-    </>
-  );
-};
+    </div>
+  </div>
+);
 
 const CommentReplies = ({ replies }: { replies: CommentData[] }) => {
   const [showReplies, setShowReplies] = useState(false);
@@ -162,13 +152,25 @@ const Comment = ({
     isEditing,
     editContent,
     isSaving,
-    textareaRef,
+    textareaRef: editTextareaRef,
     setEditContent,
     startEditing,
     cancelEdit,
     saveEdit,
-    handleKeyDown,
+    handleKeyDown: handleEditKeyDown,
   } = useEditComment(comment.id, comment.content);
+
+  const {
+    isOpen: isReplyOpen,
+    replyContent,
+    isPostingReply,
+    textareaRef: replyTextareaRef,
+    setReplyContent,
+    openReply,
+    cancelReply,
+    submitReply,
+    handleKeyDown: handleReplyKeyDown,
+  } = useReplyComment(comment.id);
 
   const isOwner = userId === comment.user.id;
 
@@ -237,10 +239,10 @@ const Comment = ({
 
           {isEditing ? (
             <EditForm
-              textareaRef={textareaRef}
+              textareaRef={editTextareaRef}
               editContent={editContent}
               setEditContent={setEditContent}
-              handleKeyDown={handleKeyDown}
+              handleKeyDown={handleEditKeyDown}
               isSaving={isSaving}
               cancelEdit={cancelEdit}
               saveEdit={saveEdit}
@@ -261,12 +263,32 @@ const Comment = ({
                   isActive={comment.user_reaction === "dislike"}
                   onClick={handleDislikeComment}
                 />
-                {!isReply && <ReplyForm commentId={comment.id} />}
+                {!isReply && (
+                  <button
+                    onClick={openReply}
+                    className="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
+                  >
+                    <Reply className="w-3.5 h-3.5" />
+                    Reply
+                  </button>
+                )}
               </div>
             </>
           )}
         </div>
       </div>
+
+      {!isReply && isReplyOpen && (
+        <ReplyFormBody
+          replyContent={replyContent}
+          isPostingReply={isPostingReply}
+          textareaRef={replyTextareaRef}
+          setReplyContent={setReplyContent}
+          cancelReply={cancelReply}
+          submitReply={submitReply}
+          handleKeyDown={handleReplyKeyDown}
+        />
+      )}
 
       {!isReply && <CommentReplies replies={comment.replies} />}
     </div>
