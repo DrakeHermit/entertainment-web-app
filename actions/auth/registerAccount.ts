@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { ActionState } from "@/lib/types/types";
 import { registerSchema, flattenFieldErrors } from "@/lib/validations/auth";
+import { env } from "@/lib/env";
 
 export async function registerAccount(
   _prevState: ActionState,
@@ -32,13 +33,20 @@ export async function registerAccount(
   const { email, username, password } = result.data;
   const avatarUrl = formData.get("avatarUrl") as string | null;
 
+  if (avatarUrl) {
+    const validPrefix = `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD_NAME}/`;
+    if (!avatarUrl.startsWith(validPrefix)) {
+      return { error: "Invalid avatar URL" };
+    }
+  }
+
   const userExists = await db
     .select()
     .from(users)
     .where(eq(users.email, email))
     .limit(1);
   if (userExists[0]) {
-    return { error: "User already exists", success: false };
+    return { error: "Unable to create account with this email", success: false };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -66,13 +74,12 @@ export async function registerAccount(
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
+      maxAge: env.JWT_EXPIRATION_TIME,
       path: "/",
     });
 
     return { error: null, success: true };
-  } catch (error) {
-    console.error(error);
+  } catch {
     return { error: "Failed to register account" };
   }
 }

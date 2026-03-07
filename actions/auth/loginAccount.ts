@@ -5,9 +5,11 @@ import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { ActionState } from "@/lib/types/types";
 import { loginSchema, flattenFieldErrors } from "@/lib/validations/auth";
+import { env } from "@/lib/env";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export async function loginAccount(
   prevState: ActionState,
@@ -28,6 +30,17 @@ export async function loginAccount(
   }
 
   const { email, password } = result.data;
+
+  const headersList = await headers();
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const { allowed, retryAfterSeconds } = checkRateLimit(`login:${ip}:${email}`);
+
+  if (!allowed) {
+    return {
+      error: `Too many login attempts. Please try again in ${Math.ceil(retryAfterSeconds / 60)} minutes.`,
+    };
+  }
 
   const user = await db
     .select()
@@ -55,7 +68,7 @@ export async function loginAccount(
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
+    maxAge: env.JWT_EXPIRATION_TIME,
     path: "/",
   });
   return { error: null, success: true };

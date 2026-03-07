@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { env } from "@/lib/env";
 
 export async function checkSessionValid() {
   const cookieStore = await cookies();
@@ -11,10 +12,21 @@ export async function checkSessionValid() {
     return null;
   }
   try {
-    const decoded = jwt.verify(token.value, process.env.JWT_TOKEN!);
+    const decoded = jwt.verify(token.value, env.JWT_SECRET);
+    const { userId } = decoded as { userId: string };
+
+    const user = await db
+      .select({ jwt_token: users.jwt_token })
+      .from(users)
+      .where(eq(users.id, parseInt(userId)))
+      .limit(1);
+
+    if (!user[0] || user[0].jwt_token !== token.value) {
+      return null;
+    }
+
     return decoded;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return null;
   }
 }
@@ -47,8 +59,7 @@ export async function getUserData() {
       .limit(1);
 
     return user[0] || null;
-  } catch (error) {
-    console.error(error);
+  } catch {
     return null;
   }
 }
