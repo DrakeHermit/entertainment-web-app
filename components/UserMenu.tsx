@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, LogIn, UserPlus } from "lucide-react";
+import { LogOut, LogIn, UserPlus, UserCog } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { User } from "@/lib/types/types";
 
 type UserMenuProps = {
@@ -29,6 +30,8 @@ const UserMenu = ({
   handleLogin,
   handleRegister,
 }: UserMenuProps) => {
+  const router = useRouter();
+
   if (!isOpen) return null;
 
   return (
@@ -55,6 +58,19 @@ const UserMenu = ({
               </p>
               <p className="text-xs text-white/60 truncate">{user.email}</p>
             </div>
+
+            <button
+              onClick={() => {
+                onClose();
+                router.push("/profile");
+              }}
+              className="w-full px-4 py-3 text-left text-sm text-white hover:bg-white/5 transition-colors flex items-center gap-3 group cursor-pointer"
+            >
+              <UserCog className="w-4 h-4 text-white/60 group-hover:text-red transition-colors" />
+              <span className="group-hover:text-red transition-colors">
+                Profile
+              </span>
+            </button>
 
             <button
               onClick={handleLogout}

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 export const runtime = "nodejs";
 
 const authRoutes = ["/login", "/register"];
-const protectedRoutes = ["/bookmarks"];
+const protectedRoutes = ["/bookmarks", "/profile"];
 
 function isAuthenticated(request: NextRequest): boolean {
   const token = request.cookies.get("token")?.value;
@@ -17,7 +17,7 @@ function isAuthenticated(request: NextRequest): boolean {
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const authenticated = isAuthenticated(request);
 
@@ -36,5 +36,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/bookmarks/:path*"],
+  matcher: ["/login", "/register", "/bookmarks/:path*", "/profile/:path*"],
 };
