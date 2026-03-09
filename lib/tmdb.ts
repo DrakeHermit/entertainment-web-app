@@ -15,8 +15,9 @@ export const getTrendingAll = async (): Promise<TrendingItem[]> => {
     {...options,
      next: { revalidate: 60 * 60 * 24 } }
   );
+  if (!response.ok) return [];
   const data: TrendingResponse = await response.json();
-  return data.results;
+  return data.results ?? [];
 };
 
 export const getPopularMovies = async (): Promise<Movie[]> => {
@@ -25,8 +26,9 @@ export const getPopularMovies = async (): Promise<Movie[]> => {
     {...options,
      next: { revalidate: 60 * 60 * 24 } }
   );
+  if (!response.ok) return [];
   const data: MovieResponse = await response.json();
-  return data.results.map((movie) => ({ ...movie, media_type: "movie" as const }));
+  return (data.results ?? []).map((movie) => ({ ...movie, media_type: "movie" as const }));
 };
 
 export const getPopularTVSeries = async (): Promise<TVSeries[]> => {
@@ -35,8 +37,9 @@ export const getPopularTVSeries = async (): Promise<TVSeries[]> => {
     {...options,
      next: { revalidate: 60 * 60 * 24 } }
   );
+  if (!response.ok) return [];
   const data: TVSeriesResponse = await response.json();
-  return data.results.map((tv) => ({ ...tv, media_type: "tv" as const }));
+  return (data.results ?? []).map((tv) => ({ ...tv, media_type: "tv" as const }));
 };
 
 export const getPopularAll = async (): Promise<TrendingItem[]> => {
@@ -59,8 +62,9 @@ export const getTopRatedMovies = async (): Promise<Movie[]> => {
     {...options,
      next: { revalidate: 60 * 60 * 24 } }
   );
+  if (!response.ok) return [];
   const data: MovieResponse = await response.json();
-  return data.results.map((movie) => ({ ...movie, media_type: "movie" as const }));
+  return (data.results ?? []).map((movie) => ({ ...movie, media_type: "movie" as const }));
 };
 
 export const getTopRatedTVSeries = async (): Promise<TVSeries[]> => {
@@ -69,8 +73,9 @@ export const getTopRatedTVSeries = async (): Promise<TVSeries[]> => {
     {...options,
      next: { revalidate: 60 * 60 * 24 } }
   );
+  if (!response.ok) return [];
   const data: TVSeriesResponse = await response.json();
-  return data.results.map((tv) => ({ ...tv, media_type: "tv" as const }));
+  return (data.results ?? []).map((tv) => ({ ...tv, media_type: "tv" as const }));
 };
 
 export const getTopRatedAll = async (): Promise<TrendingItem[]> => {
@@ -92,8 +97,9 @@ export const searchMulti = async (query: string): Promise<TrendingItem[]> => {
     `https://api.themoviedb.org/3/search/multi?query=${encodeURIComponent(query)}`,
     options
   );
+  if (!response.ok) return [];
   const data: TrendingResponse = await response.json();
-  return data.results
+  return (data.results ?? [])
     .filter((item) => item.media_type === "movie" || item.media_type === "tv")
     .filter(isValidResult);
 };
@@ -103,8 +109,9 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
     `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}`,
     options
   );
+  if (!response.ok) return [];
   const data: MovieResponse = await response.json();
-  return data.results
+  return (data.results ?? [])
     .map((movie) => ({ ...movie, media_type: "movie" as const }))
     .filter(isValidResult);
 };
@@ -114,8 +121,9 @@ export const searchTVSeries = async (query: string): Promise<TVSeries[]> => {
     `https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}`,
     options
   );
+  if (!response.ok) return [];
   const data: TVSeriesResponse = await response.json();
-  return data.results
+  return (data.results ?? [])
     .map((tv) => ({ ...tv, media_type: "tv" as const }))
     .filter(isValidResult);
 };
