@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-export const runtime = "nodejs";
-
 const authRoutes = ["/login", "/register"];
 const protectedRoutes = ["/bookmarks", "/profile"];
 

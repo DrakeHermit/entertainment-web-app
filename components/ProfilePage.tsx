@@ -10,10 +10,13 @@ import {
   Lock,
   Eye,
   EyeOff,
-  ArrowLeft,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { User } from "@/lib/types/types";
+import DetailsBackButton from "./DetailsBackButton";
+import { updateAccountDetails } from "@/actions/profile/updateProfile";
+import { updatePassword } from "@/actions/profile/updatePassword";
 
 type ProfilePageProps = {
   user: User;
@@ -40,14 +43,21 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     user.avatar_url,
   );
+  const [accountErrors, setAccountErrors] = useState<Record<string, string>>(
+    {},
+  );
+  const [isSavingAccount, setIsSavingAccount] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>(
+    {},
+  );
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,15 +77,64 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
     }
   };
 
+  const handleSaveAccount = async () => {
+    setAccountErrors({});
+    setIsSavingAccount(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("username", username);
+
+      const result = await updateAccountDetails(formData);
+
+      if (result.fieldErrors) {
+        setAccountErrors(result.fieldErrors);
+      } else if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Account details updated");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsSavingAccount(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    setPasswordErrors({});
+    setIsSavingPassword(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("currentPassword", currentPassword);
+      formData.append("newPassword", newPassword);
+      formData.append("confirmPassword", confirmPassword);
+
+      const result = await updatePassword(formData);
+
+      if (result.fieldErrors) {
+        setPasswordErrors(result.fieldErrors);
+      } else if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Password updated");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl py-8 md:py-12">
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors border border-white rounded-full px-4 py-2 cursor-pointer mb-8"
-      >
-        <ArrowLeft className="w-5 h-5" />
-        <span>Back</span>
-      </button>
+      <DetailsBackButton />
 
       <h1 className="text-3xl font-light tracking-tight mb-10">Profile</h1>
 
@@ -157,6 +216,9 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
                 className="w-full bg-background text-white pl-11 pr-4 py-3.5 rounded-lg border border-white/10 focus:border-red focus:outline-none caret-red transition-colors placeholder-white/30"
               />
             </div>
+            {accountErrors.email && (
+              <p className="text-red text-xs mt-1">{accountErrors.email}</p>
+            )}
           </div>
 
           <div>
@@ -171,13 +233,18 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
                 className="w-full bg-background text-white pl-11 pr-4 py-3.5 rounded-lg border border-white/10 focus:border-red focus:outline-none caret-red transition-colors placeholder-white/30"
               />
             </div>
+            {accountErrors.username && (
+              <p className="text-red text-xs mt-1">{accountErrors.username}</p>
+            )}
           </div>
 
           <button
             type="button"
+            onClick={handleSaveAccount}
+            disabled={isSavingAccount}
             className="w-full sm:w-auto bg-red hover:bg-white hover:text-background text-white py-3 px-8 rounded-lg font-light text-[15px] transition-colors cursor-pointer disabled:opacity-50"
           >
-            Save Changes
+            {isSavingAccount ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </section>
@@ -214,6 +281,11 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
                 )}
               </button>
             </div>
+            {passwordErrors.currentPassword && (
+              <p className="text-red text-xs mt-1">
+                {passwordErrors.currentPassword}
+              </p>
+            )}
           </div>
 
           <div>
@@ -241,6 +313,11 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
                 )}
               </button>
             </div>
+            {passwordErrors.newPassword && (
+              <p className="text-red text-xs mt-1">
+                {passwordErrors.newPassword}
+              </p>
+            )}
           </div>
 
           <div>
@@ -268,13 +345,20 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
                 )}
               </button>
             </div>
+            {passwordErrors.confirmPassword && (
+              <p className="text-red text-xs mt-1">
+                {passwordErrors.confirmPassword}
+              </p>
+            )}
           </div>
 
           <button
             type="button"
+            onClick={handleUpdatePassword}
+            disabled={isSavingPassword}
             className="w-full sm:w-auto bg-red hover:bg-white hover:text-background text-white py-3 px-8 rounded-lg font-light text-[15px] transition-colors cursor-pointer disabled:opacity-50"
           >
-            Update Password
+            {isSavingPassword ? "Updating..." : "Update Password"}
           </button>
         </div>
       </section>
