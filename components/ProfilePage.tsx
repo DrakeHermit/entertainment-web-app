@@ -67,7 +67,6 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
 
       <h1 className="text-3xl font-light tracking-tight mb-10">Profile</h1>
 
-      {/* Avatar Section */}
       <section className="bg-semi-dark-blue rounded-2xl p-6 md:p-8 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <div className="relative group">
@@ -153,9 +152,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
           </div>
 
           <div>
-            <label className="block text-white/50 text-sm mb-2">
-              Username
-            </label>
+            <label className="block text-white/50 text-sm mb-2">Username</label>
             <div className="relative">
               <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
               <input
