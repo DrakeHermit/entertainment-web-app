@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import {
   Camera,
   Mail,
@@ -12,11 +10,9 @@ import {
   EyeOff,
   Trash2,
 } from "lucide-react";
-import { toast } from "sonner";
 import { User } from "@/lib/types/types";
+import { useProfile } from "@/lib/hooks/useProfile";
 import DetailsBackButton from "./DetailsBackButton";
-import { updateAccountDetails } from "@/actions/profile/updateProfile";
-import { updatePassword } from "@/actions/profile/updatePassword";
 
 type ProfilePageProps = {
   user: User;
@@ -35,102 +31,35 @@ const getInitials = (user: User): string => {
 };
 
 const ProfilePage = ({ user }: ProfilePageProps) => {
-  const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [email, setEmail] = useState(user.email);
-  const [username, setUsername] = useState(user.username || "");
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    user.avatar_url,
-  );
-  const [accountErrors, setAccountErrors] = useState<Record<string, string>>(
-    {},
-  );
-  const [isSavingAccount, setIsSavingAccount] = useState(false);
-
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>(
-    {},
-  );
-  const [isSavingPassword, setIsSavingPassword] = useState(false);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setAvatarPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemoveAvatar = () => {
-    setAvatarPreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleSaveAccount = async () => {
-    setAccountErrors({});
-    setIsSavingAccount(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("username", username);
-
-      const result = await updateAccountDetails(formData);
-
-      if (result.fieldErrors) {
-        setAccountErrors(result.fieldErrors);
-      } else if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Account details updated");
-        router.refresh();
-      }
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setIsSavingAccount(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    setPasswordErrors({});
-    setIsSavingPassword(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("currentPassword", currentPassword);
-      formData.append("newPassword", newPassword);
-      formData.append("confirmPassword", confirmPassword);
-
-      const result = await updatePassword(formData);
-
-      if (result.fieldErrors) {
-        setPasswordErrors(result.fieldErrors);
-      } else if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Password updated");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      }
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setIsSavingPassword(false);
-    }
-  };
+  const {
+    fileInputRef,
+    email,
+    setEmail,
+    username,
+    setUsername,
+    avatarPreview,
+    accountErrors,
+    isSavingAccount,
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    showCurrentPassword,
+    setShowCurrentPassword,
+    showNewPassword,
+    setShowNewPassword,
+    showConfirmPassword,
+    setShowConfirmPassword,
+    passwordErrors,
+    isSavingPassword,
+    handleFileChange,
+    handleRemoveAvatar,
+    triggerFileInput,
+    handleSaveAccount,
+    handleUpdatePassword,
+  } = useProfile(user);
 
   return (
     <div className="max-w-2xl py-8 md:py-12">
@@ -138,6 +67,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
 
       <h1 className="text-3xl font-light tracking-tight mb-10">Profile</h1>
 
+      {/* Avatar Section */}
       <section className="bg-semi-dark-blue rounded-2xl p-6 md:p-8 mb-6">
         <div className="flex flex-col sm:flex-row items-center gap-6">
           <div className="relative group">
@@ -157,7 +87,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
               )}
             </div>
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={triggerFileInput}
               className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
             >
               <Camera className="w-6 h-6 text-white" />
@@ -178,7 +108,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
             <p className="text-white/60 text-sm">{user.email}</p>
             <div className="flex gap-3 mt-2">
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={triggerFileInput}
                 className="text-sm text-red hover:text-white transition-colors cursor-pointer"
               >
                 Upload new photo
@@ -197,6 +127,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
         </div>
       </section>
 
+      {/* Account Details */}
       <section className="bg-semi-dark-blue rounded-2xl p-6 md:p-8 mb-6">
         <h3 className="text-lg font-medium mb-6 flex items-center gap-2">
           <UserIcon className="w-5 h-5 text-red" />
@@ -222,7 +153,9 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
           </div>
 
           <div>
-            <label className="block text-white/50 text-sm mb-2">Username</label>
+            <label className="block text-white/50 text-sm mb-2">
+              Username
+            </label>
             <div className="relative">
               <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
               <input
@@ -249,6 +182,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
         </div>
       </section>
 
+      {/* Change Password */}
       <section className="bg-semi-dark-blue rounded-2xl p-6 md:p-8">
         <h3 className="text-lg font-medium mb-6 flex items-center gap-2">
           <Lock className="w-5 h-5 text-red" />
