@@ -9,6 +9,7 @@ import {
   Eye,
   EyeOff,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import { User } from "@/lib/types/types";
 import { useProfile } from "@/lib/hooks/useProfile";
@@ -38,6 +39,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
     username,
     setUsername,
     avatarPreview,
+    isUploadingAvatar,
     accountErrors,
     isSavingAccount,
     currentPassword,
@@ -85,17 +87,24 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
                 </span>
               )}
             </div>
-            <button
-              onClick={triggerFileInput}
-              className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              <Camera className="w-6 h-6 text-white" />
-            </button>
+            {isUploadingAvatar ? (
+              <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              </div>
+            ) : (
+              <button
+                onClick={triggerFileInput}
+                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <Camera className="w-6 h-6 text-white" />
+              </button>
+            )}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleFileChange}
+              disabled={isUploadingAvatar}
               className="hidden"
             />
           </div>
@@ -108,11 +117,12 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
             <div className="flex gap-3 mt-2">
               <button
                 onClick={triggerFileInput}
-                className="text-sm text-red hover:text-white transition-colors cursor-pointer"
+                disabled={isUploadingAvatar}
+                className="text-sm text-red hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Upload new photo
+                {isUploadingAvatar ? "Uploading..." : "Upload new photo"}
               </button>
-              {avatarPreview && (
+              {avatarPreview && !isUploadingAvatar && (
                 <button
                   onClick={handleRemoveAvatar}
                   className="text-sm text-white/40 hover:text-red transition-colors cursor-pointer flex items-center gap-1"

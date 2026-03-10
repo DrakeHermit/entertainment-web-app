@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { User } from "@/lib/types/types";
 import { updateAccountDetails } from "@/actions/profile/updateProfile";
 import { updatePassword as updatePasswordAction } from "@/actions/profile/updatePassword";
+import { updateAvatar } from "@/actions/profile/updateAvatar";
 
 export function useProfile(user: User) {
   const router = useRouter();
@@ -29,22 +30,81 @@ export function useProfile(user: User) {
     {}
   );
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const previousPreview = avatarPreview;
 
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
+
+    setIsUploadingAvatar(true);
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+
+      const response = await fetch("/api/upload-avatar", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAvatarPreview(previousPreview);
+        toast.error(data.error || "Failed to upload image");
+        return;
+      }
+
+      const result = await updateAvatar(data.url);
+
+      if (result.error) {
+        setAvatarPreview(previousPreview);
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Profile picture updated");
+      router.refresh();
+    } catch {
+      setAvatarPreview(previousPreview);
+      toast.error("Something went wrong");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
-  const handleRemoveAvatar = () => {
+  const handleRemoveAvatar = async () => {
+    const previousPreview = avatarPreview;
     setAvatarPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+
+    try {
+      const result = await updateAvatar(null);
+
+      if (result.error) {
+        setAvatarPreview(previousPreview);
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("Profile picture removed");
+      router.refresh();
+    } catch {
+      setAvatarPreview(previousPreview);
+      toast.error("Something went wrong");
     }
   };
 
@@ -113,6 +173,7 @@ export function useProfile(user: User) {
     username,
     setUsername,
     avatarPreview,
+    isUploadingAvatar,
     accountErrors,
     isSavingAccount,
 
