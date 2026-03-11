@@ -46,6 +46,40 @@ function applyReaction(comment: CommentData, reaction: ReactionType): CommentDat
   };
 }
 
+function addReplyDeep(comments: CommentData[], parentId: number, reply: CommentData): CommentData[] {
+  return comments.map((comment) => {
+    if (comment.id === parentId) {
+      return { ...comment, replies: [...comment.replies, reply] };
+    }
+    return { ...comment, replies: addReplyDeep(comment.replies, parentId, reply) };
+  });
+}
+
+function updateCommentDeep(comments: CommentData[], id: number, content: string): CommentData[] {
+  return comments.map((comment) => {
+    if (comment.id === id) {
+      return { ...comment, content };
+    }
+    return { ...comment, replies: updateCommentDeep(comment.replies, id, content) };
+  });
+}
+
+function deleteCommentDeep(comments: CommentData[], id: number): CommentData[] {
+  return comments
+    .filter((comment) => comment.id !== id)
+    .map((comment) => ({
+      ...comment,
+      replies: deleteCommentDeep(comment.replies, id),
+    }));
+}
+
+function toggleReactionDeep(comments: CommentData[], id: number, reaction: ReactionType): CommentData[] {
+  return comments.map((comment) => {
+    if (comment.id === id) return applyReaction(comment, reaction);
+    return { ...comment, replies: toggleReactionDeep(comment.replies, id, reaction) };
+  });
+}
+
 function commentReducer(
   state: CommentState,
   action: CommentAction,
@@ -60,58 +94,15 @@ function commentReducer(
       };
     case "ADD_REPLY": {
       const { parentId, reply } = action.payload;
-      return {
-        ...state,
-        comments: state.comments.map((comment) =>
-          comment.id === parentId
-            ? { ...comment, replies: [...comment.replies, reply] }
-            : comment,
-        ),
-      };
+      return { ...state, comments: addReplyDeep(state.comments, parentId, reply) };
     }
     case "UPDATE_COMMENT":
-      return {
-        ...state,
-        comments: state.comments.map((comment) => {
-          if (comment.id === action.payload.id) {
-            return { ...comment, content: action.payload.content };
-          }
-          return {
-            ...comment,
-            replies: comment.replies.map((reply) =>
-              reply.id === action.payload.id
-                ? { ...reply, content: action.payload.content }
-                : reply,
-            ),
-          };
-        }),
-      };
+      return { ...state, comments: updateCommentDeep(state.comments, action.payload.id, action.payload.content) };
     case "DELETE_COMMENT":
-      return {
-        ...state,
-        comments: state.comments
-          .filter((comment) => comment.id !== action.payload)
-          .map((comment) => ({
-            ...comment,
-            replies: comment.replies.filter(
-              (reply) => reply.id !== action.payload,
-            ),
-          })),
-      };
+      return { ...state, comments: deleteCommentDeep(state.comments, action.payload) };
     case "TOGGLE_REACTION": {
       const { id, reaction } = action.payload;
-      return {
-        ...state,
-        comments: state.comments.map((comment) => {
-          if (comment.id === id) return applyReaction(comment, reaction);
-          return {
-            ...comment,
-            replies: comment.replies.map((reply) =>
-              reply.id === id ? applyReaction(reply, reaction) : reply,
-            ),
-          };
-        }),
-      };
+      return { ...state, comments: toggleReactionDeep(state.comments, id, reaction) };
     }
     default:
       return state;
