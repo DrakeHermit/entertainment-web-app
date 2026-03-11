@@ -38,22 +38,20 @@ function includeReactions(
 }
 
 function nestReplies(flatComments: Omit<CommentData, "replies">[]): CommentData[] {
+  const map = new Map<number, CommentData>();
   const topLevel: CommentData[] = [];
-  const repliesByParent = new Map<number, CommentData[]>();
 
   for (const comment of flatComments) {
-    const withReplies: CommentData = { ...comment, replies: [] };
-    if (comment.parent_id === null) {
-      topLevel.push(withReplies);
-    } else {
-      const list = repliesByParent.get(comment.parent_id) ?? [];
-      list.push(withReplies);
-      repliesByParent.set(comment.parent_id, list);
-    }
+    map.set(comment.id, { ...comment, replies: [] });
   }
 
-  for (const comment of topLevel) {
-    comment.replies = repliesByParent.get(comment.id) ?? [];
+  for (const comment of flatComments) {
+    const node = map.get(comment.id)!;
+    if (comment.parent_id !== null && map.has(comment.parent_id)) {
+      map.get(comment.parent_id)!.replies.push(node);
+    } else {
+      topLevel.push(node);
+    }
   }
 
   return topLevel;
