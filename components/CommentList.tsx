@@ -2,15 +2,17 @@
 
 import { MessageCircle } from "lucide-react";
 import { useComments } from "@/contexts/CommentContext";
+import { CommentData } from "@/lib/types/types";
 import Comment from "./Comment";
+
+function countAll(comments: CommentData[]): number {
+  return comments.reduce((sum, c) => sum + 1 + countAll(c.replies), 0);
+}
 
 const CommentList = () => {
   const { comments } = useComments();
 
-  const totalCount = comments.reduce(
-    (sum, c) => sum + 1 + c.replies.length,
-    0,
-  );
+  const totalCount = countAll(comments);
 
   return (
     <div className="flex justify-center mt-600">

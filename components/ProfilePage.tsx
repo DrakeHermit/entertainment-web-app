@@ -64,7 +64,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
   } = useProfile(user);
 
   return (
-    <div className="max-w-2xl py-8 md:py-12">
+    <div className="max-w-2xl pb-8">
       <DetailsBackButton />
 
       <h1 className="text-3xl font-light tracking-tight mb-10">Profile</h1>

@@ -71,6 +71,7 @@ const ReplyFormBody = ({
   cancelReply,
   submitReply,
   handleKeyDown,
+  depth,
 }: {
   replyContent: string;
   isPostingReply: boolean;
@@ -79,8 +80,9 @@ const ReplyFormBody = ({
   cancelReply: () => void;
   submitReply: () => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  depth: number;
 }) => (
-  <div className="flex flex-col gap-2 mt-3 ml-8">
+  <div className={`flex flex-col gap-2 mt-3 ${getIndentMargin(depth)}`}>
     <textarea
       ref={textareaRef}
       value={replyContent}
@@ -112,13 +114,20 @@ const ReplyFormBody = ({
   </div>
 );
 
-const CommentReplies = ({ replies }: { replies: CommentData[] }) => {
+const MAX_DEPTH = 2;
+const INDENT_MARGINS = ["ml-6", "ml-4", "ml-3"];
+
+function getIndentMargin(depth: number): string {
+  return INDENT_MARGINS[Math.min(depth, INDENT_MARGINS.length - 1)];
+}
+
+const CommentReplies = ({ replies, depth }: { replies: CommentData[]; depth: number }) => {
   const [showReplies, setShowReplies] = useState(false);
 
   if (replies.length === 0) return null;
 
   return (
-    <div className="mt-1 ml-8">
+    <div className={`mt-1 ${getIndentMargin(depth)}`}>
       <button
         onClick={() => setShowReplies(!showReplies)}
         className="flex items-center gap-1.5 text-red hover:text-red/80 text-xs font-semibold transition-colors cursor-pointer py-1"
@@ -129,7 +138,7 @@ const CommentReplies = ({ replies }: { replies: CommentData[] }) => {
       {showReplies && (
         <div className="flex flex-col gap-2">
           {replies.map((reply) => (
-            <Comment key={reply.id} comment={reply} isReply />
+            <Comment key={reply.id} comment={reply} depth={depth + 1} />
           ))}
         </div>
       )}
@@ -139,10 +148,10 @@ const CommentReplies = ({ replies }: { replies: CommentData[] }) => {
 
 const Comment = ({
   comment,
-  isReply = false,
+  depth = 0,
 }: {
   comment: CommentData;
-  isReply?: boolean;
+  depth?: number;
 }) => {
   const displayName = getDisplayName(comment.user.username, comment.user.email);
   const { dispatch, userId } = useComments();
@@ -209,7 +218,7 @@ const Comment = ({
 
   return (
     <div>
-      <div className={`flex gap-3 bg-semi-dark-blue p-4 rounded-lg ${isReply ? "ml-8 mt-2" : ""}`}>
+      <div className={`flex gap-3 bg-semi-dark-blue p-4 rounded-lg ${depth > 0 ? "mt-2" : ""}`}>
         <div className="shrink-0 pt-0.5">
           <UserAvatar user={comment.user} />
         </div>
@@ -263,7 +272,7 @@ const Comment = ({
                   isActive={comment.user_reaction === "dislike"}
                   onClick={handleDislikeComment}
                 />
-                {!isReply && (
+                {depth < MAX_DEPTH && (
                   <button
                     onClick={openReply}
                     className="flex items-center gap-1.5 text-white/50 hover:text-white text-xs transition-colors cursor-pointer"
@@ -278,7 +287,7 @@ const Comment = ({
         </div>
       </div>
 
-      {!isReply && isReplyOpen && (
+      {depth < MAX_DEPTH && isReplyOpen && (
         <ReplyFormBody
           replyContent={replyContent}
           isPostingReply={isPostingReply}
@@ -287,10 +296,11 @@ const Comment = ({
           cancelReply={cancelReply}
           submitReply={submitReply}
           handleKeyDown={handleReplyKeyDown}
+          depth={depth}
         />
       )}
 
-      {!isReply && <CommentReplies replies={comment.replies} />}
+      <CommentReplies replies={comment.replies} depth={depth} />
     </div>
   );
 };
