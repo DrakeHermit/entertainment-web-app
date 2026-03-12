@@ -22,6 +22,13 @@
       "when": 1772362868088,
       "tag": "0002_tiny_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773319506893,
+      "tag": "0003_swift_hammerhead",
+      "breakpoints": true
     }
   ]
 }

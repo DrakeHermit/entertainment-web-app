@@ -9,6 +9,7 @@ export const users = pgTable("users", {
     createdAt: timestamp().notNull().defaultNow(),
     updatedAt: timestamp().notNull().defaultNow(),
     jwt_token: text(),
+    refresh_token: text(),
 });
 
 export const movies = pgTable('movies', {

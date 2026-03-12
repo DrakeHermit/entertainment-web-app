@@ -6,3 +6,9 @@ export const generateToken = (userId: string) => {
     expiresIn: env.JWT_EXPIRATION_TIME,
   });
 };
+
+export const generateRefreshToken = (userId: string) => {
+  return jwt.sign({ userId }, env.REFRESH_TOKEN_SECRET, {
+    expiresIn: env.REFRESH_TOKEN_EXPIRATION_TIME,
+  });
+};
