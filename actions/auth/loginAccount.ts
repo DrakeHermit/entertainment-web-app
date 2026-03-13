@@ -1,6 +1,6 @@
 "use server";
 
-import { generateToken } from "@/lib/auth/generateToken";
+import { generateRefreshToken, generateToken } from "@/lib/auth/generateToken";
 import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import bcrypt from "bcrypt";
@@ -59,9 +59,10 @@ export async function loginAccount(
   }
 
   const token = generateToken(user[0].id.toString());
+  const refreshToken = generateRefreshToken(user[0].id.toString());
   await db
     .update(users)
-    .set({ jwt_token: token })
+    .set({ jwt_token: token, refresh_token: refreshToken })
     .where(eq(users.id, user[0].id));
   const cookieStore = await cookies();
   cookieStore.set("token", token, {
@@ -70,6 +71,13 @@ export async function loginAccount(
     sameSite: "strict",
     maxAge: env.JWT_EXPIRATION_TIME,
     path: "/",
+  });
+  cookieStore.set("refresh_token", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: env.REFRESH_TOKEN_EXPIRATION_TIME,
+    path: "/api/auth/refresh-token",
   });
   return { error: null, success: true };
 }
