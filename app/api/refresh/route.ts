@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: env.REFRESH_TOKEN_EXPIRATION_TIME,
-      path: "/api/auth/refresh",
+      path: "/",
     });
     return NextResponse.json({ error: null, success: true });
   } catch {

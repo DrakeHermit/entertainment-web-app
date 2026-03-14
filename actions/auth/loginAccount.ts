@@ -77,7 +77,7 @@ export async function loginAccount(
     secure: process.env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: env.REFRESH_TOKEN_EXPIRATION_TIME,
-    path: "/api/auth/refresh-token",
+    path: "/",
   });
   return { error: null, success: true };
 }
