@@ -5,6 +5,7 @@ import { registerAccount } from "@/actions/auth/registerAccount";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { toast } from "sonner";
 import { registerSchema, flattenFieldErrors } from "@/lib/validations/auth";
 
 const RegisterPage = () => {
@@ -118,6 +119,7 @@ const RegisterPage = () => {
         return;
       }
 
+      toast.success("Account created successfully");
       router.push("/");
     } catch {
       setGeneralError("An unexpected error occurred. Please try again.");

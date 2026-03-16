@@ -4,6 +4,7 @@ import { postComment } from "@/actions/comments/postComment";
 import { useComments } from "@/contexts/CommentContext";
 import { MediaMetadata } from "@/lib/types/types";
 import { useActionState, useRef } from "react";
+import { toast } from "sonner";
 
 const CommentField = ({
   userId,
@@ -33,6 +34,9 @@ const CommentField = ({
     if (result.success && result.comment) {
       dispatch({ type: "ADD_COMMENT", payload: result.comment });
       formRef.current?.reset();
+      toast.success("Comment posted");
+    } else if (result.error) {
+      toast.error(result.error);
     }
 
     return result;

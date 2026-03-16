@@ -1,5 +1,6 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { addBookmark } from "@/actions/bookmarks/addBookmark";
 import { removeBookmark } from "@/actions/bookmarks/removeBookmark";
 import { useBookmarks } from "@/contexts/BookmarkContext";
@@ -29,9 +30,12 @@ export function useBookmarkToggle({
   const bookmarked = isBookmarked(id, category);
 
   const toggleBookmark = () => {
-    if (!userId || isPending) {
+    if (!userId) {
+      toast.error("Please log in to bookmark");
       return;
     }
+
+    if (isPending) return;
 
     startTransition(async () => {
       updateOptimisticBookmark(id, category, bookmarked ? "remove" : "add");
@@ -39,7 +43,7 @@ export function useBookmarkToggle({
       if (bookmarked) {
         const result = await removeBookmark(userId, id, category);
         if (result.error) {
-          console.error("Failed to remove bookmark:", result.error);
+          toast.error("Failed to remove bookmark");
           return;
         }
       } else {
@@ -52,7 +56,7 @@ export function useBookmarkToggle({
           thumbnail,
         });
         if (result.error) {
-          console.error("Failed to add bookmark:", result.error);
+          toast.error("Failed to add bookmark");
           return;
         }
       }

@@ -187,6 +187,7 @@ const Comment = ({
     const result = await deleteComment(userId, comment.id, type);
     if (result.success) {
       dispatch({ type: "DELETE_COMMENT", payload: comment.id });
+      toast.success("Comment deleted");
     } else {
       toast.error(result.error || "Something went wrong");
     }

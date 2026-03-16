@@ -40,13 +40,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (state.success) {
-      toast.success("Logged in successfully", {
-        style: {
-          background: "#40eb34",
-          color: "#000",
-          fontWeight: "bold",
-        },
-      });
+      toast.success("Logged in successfully");
       redirect("/");
     }
   }, [state.success]);

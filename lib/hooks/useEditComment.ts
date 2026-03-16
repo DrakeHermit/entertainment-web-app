@@ -40,6 +40,7 @@ export function useEditComment(commentId: number, originalContent: string) {
         payload: { id: commentId, content: trimmed },
       });
       setIsEditing(false);
+      toast.success("Comment updated");
     } else {
       toast.error(result.error || "Failed to update comment");
     }

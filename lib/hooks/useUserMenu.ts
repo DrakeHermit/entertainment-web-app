@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { logoutAccount } from "@/actions/auth/logoutAccount";
 
 const useIsDesktop = () => {
@@ -56,8 +57,9 @@ export const useUserMenu = () => {
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
   const handleLogout = async () => {
-    await logoutAccount();
     closeMenu();
+    toast.success("Logged out successfully");
+    await logoutAccount();
     router.refresh();
   };
 
