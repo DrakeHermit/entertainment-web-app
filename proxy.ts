@@ -105,7 +105,12 @@ export async function proxy(request: NextRequest) {
           );
         }
 
-        return setCookies(NextResponse.next(), newAccessToken, newRefreshToken);
+        request.cookies.set("token", newAccessToken);
+        request.cookies.set("refresh_token", newRefreshToken);
+        const response = NextResponse.next({
+          request: { headers: request.headers },
+        });
+        return setCookies(response, newAccessToken, newRefreshToken);
       } else {
         if (user[0]) {
           await database
