@@ -30,24 +30,13 @@ async function signToken(userId: string, secret: Uint8Array, expiresIn: number) 
     .sign(secret);
 }
 
-function setCookies(
-  response: NextResponse,
-  accessToken: string,
-  refreshToken: string
-) {
+function setAccessTokenCookie(response: NextResponse, accessToken: string) {
   const secure = process.env.NODE_ENV === "production";
   response.cookies.set("token", accessToken, {
     httpOnly: true,
     secure,
     sameSite: "strict",
     maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
-    path: "/",
-  });
-  response.cookies.set("refresh_token", refreshToken, {
-    httpOnly: true,
-    secure,
-    sameSite: "strict",
-    maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRATION_TIME!),
     path: "/",
   });
   return response;
@@ -85,32 +74,28 @@ export async function proxy(request: NextRequest) {
 
       if (user[0] && user[0].refresh_token === refreshToken) {
         const expTime = parseInt(process.env.JWT_EXPIRATION_TIME!);
-        const refreshExpTime = parseInt(process.env.REFRESH_TOKEN_EXPIRATION_TIME!);
 
         const newAccessToken = await signToken(user[0].id.toString(), jwtSecret(), expTime);
-        const newRefreshToken = await signToken(user[0].id.toString(), refreshSecret(), refreshExpTime);
 
         await database
           .update(users)
-          .set({ jwt_token: newAccessToken, refresh_token: newRefreshToken })
+          .set({ jwt_token: newAccessToken })
           .where(eq(users.id, user[0].id));
 
         isAuthenticated = true;
 
         if (authRoutes.includes(pathname)) {
-          return setCookies(
+          return setAccessTokenCookie(
             NextResponse.redirect(new URL("/", request.url)),
-            newAccessToken,
-            newRefreshToken
+            newAccessToken
           );
         }
 
         request.cookies.set("token", newAccessToken);
-        request.cookies.set("refresh_token", newRefreshToken);
         const response = NextResponse.next({
           request: { headers: request.headers },
         });
-        return setCookies(response, newAccessToken, newRefreshToken);
+        return setAccessTokenCookie(response, newAccessToken);
       } else {
         if (user[0]) {
           await database
