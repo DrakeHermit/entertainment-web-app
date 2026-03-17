@@ -2,7 +2,13 @@ import { TrendingItem } from "@/lib/types/types";
 import { getTitle, getReleaseYear } from "@/lib/helpers";
 import RecommendedCard from "./RecommendedCard";
 
-const RecommendedSection = ({ recommended, userId }: { recommended: TrendingItem[]; userId?: number }) => {
+const RecommendedSection = ({
+  recommended,
+  userId,
+}: {
+  recommended: TrendingItem[];
+  userId?: number;
+}) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
       {recommended.map((item, index) => (
@@ -20,6 +26,7 @@ const RecommendedSection = ({ recommended, userId }: { recommended: TrendingItem
           }
           priority={index < 4}
           userId={userId}
+          genreIds={item.genre_ids}
         />
       ))}
     </div>

@@ -127,6 +127,7 @@ export interface AddBookmarkProps {
   category: "Movie" | "TV Series";
   rating: string;
   thumbnail?: string;
+  genreIds: number[];
 }
 
 export interface User {
@@ -142,6 +143,7 @@ export interface MediaMetadata {
   backdropPath: string;
   year: number;
   rating: string;
+  genreIds: number[];
 }
 
 export interface PostCommentProps {

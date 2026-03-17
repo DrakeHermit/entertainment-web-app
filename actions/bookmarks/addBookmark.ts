@@ -9,7 +9,7 @@ import { and, eq, sql } from "drizzle-orm";
 
 export async function addBookmark(
   userId: number, 
-  { id, title, year, category, rating, thumbnail }: AddBookmarkProps
+  { id, title, year, category, rating, thumbnail, genreIds }: AddBookmarkProps
 ) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token");
@@ -27,10 +27,14 @@ export async function addBookmark(
           backdrop_path: thumbnail || "",
           release_date: new Date(year, 0, 1),
           rating: parseFloat(rating),
+          genreIds: genreIds,
         })
         .onConflictDoUpdate({
           target: movies.tmdb_id,
-          set: { title: sql`excluded.title` },
+          set: {
+            title: sql`excluded.title`,
+            genreIds: sql`excluded.genre_ids`
+          },
         })
         .returning({ id: movies.id });
 
@@ -63,10 +67,14 @@ export async function addBookmark(
           backdrop_path: thumbnail || "",
           first_air_date: new Date(year, 0, 1),
           rating: parseFloat(rating),
+          genreIds: genreIds,
         })
         .onConflictDoUpdate({
           target: tvSeries.tmdb_id,
-          set: { name: sql`excluded.name` },
+          set: {
+            name: sql`excluded.name`,
+            genreIds: sql`excluded.genre_ids`,
+          },
         })
         .returning({ id: tvSeries.id });
 

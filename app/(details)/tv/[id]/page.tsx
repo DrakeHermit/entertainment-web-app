@@ -244,6 +244,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
             : "",
           year: new Date(tvSeries.first_air_date).getFullYear(),
           rating: tvSeries.vote_average.toFixed(1),
+          genreIds: tvSeries.genres.map((genre) => genre.id),
         }}
       >
         <CommentField
@@ -258,6 +259,7 @@ export default async function TVSeriesDetailsPage({ params }: PageProps) {
               : "",
             year: new Date(tvSeries.first_air_date).getFullYear(),
             rating: tvSeries.vote_average.toFixed(1),
+            genreIds: tvSeries.genres.map((genre) => genre.id),
           }}
         />
         <CommentList />

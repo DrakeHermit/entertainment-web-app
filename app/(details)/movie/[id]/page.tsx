@@ -208,6 +208,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
             : "",
           year: new Date(movie.release_date).getFullYear(),
           rating: movie.vote_average.toFixed(1),
+          genreIds: movie.genres.map((genre) => genre.id),
         }}
       >
         <CommentField
@@ -222,6 +223,7 @@ export default async function MovieDetailsPage({ params }: PageProps) {
               : "",
             year: new Date(movie.release_date).getFullYear(),
             rating: movie.vote_average.toFixed(1),
+            genreIds: movie.genres.map((genre) => genre.id),
           }}
         />
         <CommentList />

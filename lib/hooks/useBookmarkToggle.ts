@@ -13,6 +13,7 @@ interface UseBookmarkToggleProps {
   rating: string;
   thumbnail?: string;
   userId?: number;
+  genreIds?: number[];
 }
 
 export function useBookmarkToggle({
@@ -23,6 +24,7 @@ export function useBookmarkToggle({
   rating,
   thumbnail,
   userId,
+  genreIds,
 }: UseBookmarkToggleProps) {
   const { isBookmarked, updateOptimisticBookmark } = useBookmarks();
   const [isPending, startTransition] = useTransition();
@@ -54,6 +56,7 @@ export function useBookmarkToggle({
           category,
           rating,
           thumbnail,
+          genreIds: genreIds || [],
         });
         if (result.error) {
           toast.error("Failed to add bookmark");

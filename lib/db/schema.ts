@@ -18,6 +18,7 @@ export const movies = pgTable('movies', {
   title: text().notNull(),
   backdrop_path: text().notNull(),
   release_date: timestamp().notNull(),
+  genreIds: integer('genre_ids').array(),
   rating: real().notNull(),
 });
 
@@ -27,6 +28,7 @@ export const tvSeries = pgTable('tv_series', {
   name: text().notNull(),
   backdrop_path: text().notNull(),
   first_air_date: timestamp().notNull(),
+  genreIds: integer('genre_ids').array(),
   rating: real().notNull(),
 });
 

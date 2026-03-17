@@ -15,6 +15,7 @@ interface RecommendedCardProps {
   thumbnail?: string;
   priority?: boolean;
   userId?: number;
+  genreIds?: number[];
 }
 
 const RecommendedCard = ({
@@ -26,6 +27,7 @@ const RecommendedCard = ({
   thumbnail,
   priority = false,
   userId,
+  genreIds,
 }: RecommendedCardProps) => {
   const { bookmarked, isLoading, toggleBookmark } = useBookmarkToggle({
     id,
@@ -35,6 +37,7 @@ const RecommendedCard = ({
     rating,
     thumbnail,
     userId,
+    genreIds,
   });
 
   const CategoryIcon = category === "Movie" ? Film : Tv;

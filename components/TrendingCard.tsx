@@ -15,6 +15,7 @@ interface TrendingCardProps {
   thumbnail?: string;
   priority?: boolean;
   userId?: number;
+  genreIds?: number[];
 }
 
 const TrendingCard = ({
@@ -25,6 +26,7 @@ const TrendingCard = ({
   rating,
   thumbnail,
   priority = false,
+  genreIds,
   userId,
 }: TrendingCardProps) => {
   const { bookmarked, isLoading, toggleBookmark } = useBookmarkToggle({
@@ -35,6 +37,7 @@ const TrendingCard = ({
     rating,
     thumbnail,
     userId,
+    genreIds,
   });
 
   const CategoryIcon = category === "Movie" ? Film : Tv;

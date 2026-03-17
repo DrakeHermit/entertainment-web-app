@@ -12,6 +12,7 @@ interface BookmarkButtonProps {
   thumbnail?: string;
   userId?: number;
   className?: string;
+  genreIds?: number[];
 }
 
 export default function BookmarkButton({
@@ -22,6 +23,7 @@ export default function BookmarkButton({
   rating,
   thumbnail,
   userId,
+  genreIds,
   className = "",
 }: BookmarkButtonProps) {
   const { bookmarked, isLoading, toggleBookmark } = useBookmarkToggle({
@@ -32,6 +34,7 @@ export default function BookmarkButton({
     rating,
     thumbnail,
     userId,
+    genreIds,
   });
 
   return (
