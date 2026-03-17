@@ -1,6 +1,8 @@
 import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse, MovieDetails, TVSeriesDetails } from "./types/types";
 import { isValidResult } from "./helpers";
 
+const PAGES_TO_FETCH = 4;
+
 const options = {
   method: "GET",
   headers: {
@@ -9,73 +11,85 @@ const options = {
   },
 };
 
-export const getTrendingAll = async (): Promise<TrendingItem[]> => {
-  const response = await fetch(
-    "https://api.themoviedb.org/3/trending/all/week",
-    {...options,
-     next: { revalidate: 60 * 60 * 24 } }
+const fetchOptions = { ...options, next: { revalidate: 60 * 60 * 24 } };
+
+async function fetchPages<T>(
+  baseUrl: string,
+  pages: number = PAGES_TO_FETCH
+): Promise<T[]> {
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  const requests = Array.from({ length: pages }, (_, i) =>
+    fetch(`${baseUrl}${separator}page=${i + 1}`, fetchOptions)
   );
-  if (!response.ok) return [];
-  const data: TrendingResponse = await response.json();
-  return data.results ?? [];
+  const responses = await Promise.all(requests);
+  const results: T[] = [];
+  for (const response of responses) {
+    if (!response.ok) continue;
+    const data = await response.json();
+    results.push(...(data.results ?? []));
+  }
+  return results;
+}
+
+export const getTrendingAll = async (): Promise<TrendingItem[]> => {
+  const results = await fetchPages<TrendingItem>(
+    "https://api.themoviedb.org/3/trending/all/week"
+  );
+  return results.filter(isValidResult);
 };
 
 export const getPopularMovies = async (): Promise<Movie[]> => {
-  const response = await fetch(
-    "https://api.themoviedb.org/3/movie/popular",
-    {...options,
-     next: { revalidate: 60 * 60 * 24 } }
+  const results = await fetchPages<Omit<Movie, "media_type">>(
+    "https://api.themoviedb.org/3/movie/popular"
   );
-  if (!response.ok) return [];
-  const data: MovieResponse = await response.json();
-  return (data.results ?? []).map((movie) => ({ ...movie, media_type: "movie" as const }));
+  return results
+    .map((movie) => ({ ...movie, media_type: "movie" as const }))
+    .filter(isValidResult);
 };
 
 export const getPopularTVSeries = async (): Promise<TVSeries[]> => {
-  const response = await fetch(
-    "https://api.themoviedb.org/3/tv/popular",
-    {...options,
-     next: { revalidate: 60 * 60 * 24 } }
+  const results = await fetchPages<Omit<TVSeries, "media_type">>(
+    "https://api.themoviedb.org/3/tv/popular"
   );
-  if (!response.ok) return [];
-  const data: TVSeriesResponse = await response.json();
-  return (data.results ?? []).map((tv) => ({ ...tv, media_type: "tv" as const }));
+  return results
+    .map((tv) => ({ ...tv, media_type: "tv" as const }))
+    .filter(isValidResult);
 };
+
+function interleave<A, B>(a: A[], b: B[]): (A | B)[] {
+  const result: (A | B)[] = [];
+  const maxLength = Math.max(a.length, b.length);
+  for (let i = 0; i < maxLength; i++) {
+    if (a[i]) result.push(a[i]);
+    if (b[i]) result.push(b[i]);
+  }
+  return result;
+}
 
 export const getPopularAll = async (): Promise<TrendingItem[]> => {
   const [movies, tvSeries] = await Promise.all([
     getPopularMovies(),
     getPopularTVSeries(),
   ]);
-  const result: TrendingItem[] = [];
-  const maxLength = Math.max(movies.length, tvSeries.length);
-  for (let i = 0; i < maxLength; i++) {
-    if (movies[i]) result.push(movies[i]);
-    if (tvSeries[i]) result.push(tvSeries[i]);
-  }
-  return result;
+  return interleave(movies, tvSeries);
 };
 
 export const getTopRatedMovies = async (): Promise<Movie[]> => {
-  const response = await fetch(
-    "https://api.themoviedb.org/3/movie/top_rated",
-    {...options,
-     next: { revalidate: 60 * 60 * 24 } }
+  const results = await fetchPages<Omit<Movie, "media_type">>(
+    "https://api.themoviedb.org/3/movie/top_rated"
   );
-  if (!response.ok) return [];
-  const data: MovieResponse = await response.json();
-  return (data.results ?? []).map((movie) => ({ ...movie, media_type: "movie" as const }));
+  return results
+    .map((movie) => ({ ...movie, media_type: "movie" as const }))
+    .filter(isValidResult);
 };
 
 export const getTopRatedTVSeries = async (): Promise<TVSeries[]> => {
-  const response = await fetch(
-    "https://api.themoviedb.org/3/tv/top_rated",
-    {...options,
-     next: { revalidate: 60 * 60 * 24 } }
+  const results = await fetchPages<Omit<TVSeries, "media_type">>(
+    "https://api.themoviedb.org/3/tv/top_rated"
   );
-  if (!response.ok) return [];
-  const data: TVSeriesResponse = await response.json();
-  return (data.results ?? []).map((tv) => ({ ...tv, media_type: "tv" as const }));
+  return results
+    .map((tv) => ({ ...tv, media_type: "tv" as const }))
+    .filter(isValidResult);
 };
 
 export const getTopRatedAll = async (): Promise<TrendingItem[]> => {
@@ -83,13 +97,7 @@ export const getTopRatedAll = async (): Promise<TrendingItem[]> => {
     getTopRatedMovies(),
     getTopRatedTVSeries(),
   ]);
-  const result: TrendingItem[] = [];
-  const maxLength = Math.max(movies.length, tvSeries.length);
-  for (let i = 0; i < maxLength; i++) {
-    if (movies[i]) result.push(movies[i]);
-    if (tvSeries[i]) result.push(tvSeries[i]);
-  }
-  return result;
+  return interleave(movies, tvSeries);
 };
 
 export const searchMulti = async (query: string): Promise<TrendingItem[]> => {

@@ -13,7 +13,7 @@ const RecommendedSection = ({
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
       {recommended.map((item, index) => (
         <RecommendedCard
-          key={item.id}
+          key={`${item.id}-${index}`}
           id={item.id}
           title={getTitle(item)}
           year={getReleaseYear(item)}

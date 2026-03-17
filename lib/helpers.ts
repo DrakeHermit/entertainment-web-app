@@ -9,13 +9,16 @@ export function getReleaseYear(item: TrendingItem): number {
   return date ? new Date(date).getFullYear() : 0;
 }
 
+const NEWS_GENRE_ID = 10763;
+
 export function isValidResult(item: TrendingItem): boolean {
   const title = getTitle(item);
   const year = getReleaseYear(item);
   return !!(
     item.backdrop_path &&
     title.length > 3 &&
-    year > 0
+    year >= 1990 &&
+    !item.genre_ids.includes(NEWS_GENRE_ID)
   );
 }
 
