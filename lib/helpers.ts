@@ -11,6 +11,8 @@ export function getReleaseYear(item: TrendingItem): number {
 
 const NEWS_GENRE_ID = 10763;
 
+const MIN_VOTE_AVERAGE = 5;
+
 export function isValidResult(item: TrendingItem): boolean {
   const title = getTitle(item);
   const year = getReleaseYear(item);
@@ -18,6 +20,7 @@ export function isValidResult(item: TrendingItem): boolean {
     item.backdrop_path &&
     title.length > 3 &&
     year >= 1990 &&
+    item.vote_average >= MIN_VOTE_AVERAGE &&
     !item.genre_ids.includes(NEWS_GENRE_ID)
   );
 }

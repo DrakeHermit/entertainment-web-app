@@ -3,6 +3,12 @@ import { isValidResult } from "./helpers";
 
 const PAGES_TO_FETCH = 4;
 
+const EXCLUDED_CAROUSEL_GENRE_IDS = new Set([
+  36,  
+  10752, 
+  10768, 
+]);
+
 const options = {
   method: "GET",
   headers: {
@@ -114,7 +120,13 @@ export const getTopRatedAll = async (): Promise<TrendingItem[]> => {
     getTopRatedMovies(),
     getTopRatedTVSeries(),
   ]);
-  return interleave(movies, tvSeries);
+  const filteredMovies = movies.filter(
+    (m) => !m.genre_ids.some((id) => EXCLUDED_CAROUSEL_GENRE_IDS.has(id))
+  );
+  const filteredTVSeries = tvSeries.filter(
+    (tv) => !tv.genre_ids.some((id) => EXCLUDED_CAROUSEL_GENRE_IDS.has(id))
+  );
+  return interleave(filteredMovies, filteredTVSeries);
 };
 
 export const searchMulti = async (query: string): Promise<TrendingItem[]> => {
