@@ -1,5 +1,6 @@
 import Carousel from "@/components/Carousel";
 import { getTopRatedAll, getPopularAll } from "@/lib/tmdb";
+import { getPersonalizedRecommendations } from "@/lib/recommendations";
 import RecommendedSection from "@/components/RecommendedSection";
 import { Suspense } from "react";
 import CarouselSkeleton from "@/components/CarouselSkeleton";
@@ -13,8 +14,10 @@ async function TopRatedCarousel({ userId }: { userId?: number }) {
 }
 
 async function RecommendedBlock({ userId }: { userId?: number }) {
-  const popular = await getPopularAll();
-  return <RecommendedSection recommended={popular} userId={userId} />;
+  const recommended = userId
+    ? await getPersonalizedRecommendations(userId, "all")
+    : await getPopularAll();
+  return <RecommendedSection recommended={recommended} userId={userId} />;
 }
 
 export default async function Home() {

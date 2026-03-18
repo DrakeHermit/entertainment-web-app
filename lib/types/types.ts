@@ -173,3 +173,7 @@ export interface CommentData {
   user_reaction: ReactionType | null;
   replies: CommentData[];
 }
+
+export interface GenreResponse {
+  genres: Genre[];
+}

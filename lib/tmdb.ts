@@ -1,4 +1,4 @@
-import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse, MovieDetails, TVSeriesDetails } from "./types/types";
+import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse, MovieDetails, TVSeriesDetails, Genre, GenreResponse } from "./types/types";
 import { isValidResult } from "./helpers";
 
 const PAGES_TO_FETCH = 4;
@@ -12,6 +12,15 @@ const options = {
 };
 
 const fetchOptions = { ...options, next: { revalidate: 60 * 60 * 24 } };
+
+function shuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 async function fetchPages<T>(
   baseUrl: string,
@@ -35,25 +44,29 @@ export const getTrendingAll = async (): Promise<TrendingItem[]> => {
   const results = await fetchPages<TrendingItem>(
     "https://api.themoviedb.org/3/trending/all/week"
   );
-  return results.filter(isValidResult);
+  return shuffle(results.filter(isValidResult));
 };
 
 export const getPopularMovies = async (): Promise<Movie[]> => {
   const results = await fetchPages<Omit<Movie, "media_type">>(
     "https://api.themoviedb.org/3/movie/popular"
   );
-  return results
-    .map((movie) => ({ ...movie, media_type: "movie" as const }))
-    .filter(isValidResult);
+  return shuffle(
+    results
+      .map((movie) => ({ ...movie, media_type: "movie" as const }))
+      .filter(isValidResult)
+  );
 };
 
 export const getPopularTVSeries = async (): Promise<TVSeries[]> => {
   const results = await fetchPages<Omit<TVSeries, "media_type">>(
     "https://api.themoviedb.org/3/tv/popular"
   );
-  return results
-    .map((tv) => ({ ...tv, media_type: "tv" as const }))
-    .filter(isValidResult);
+  return shuffle(
+    results
+      .map((tv) => ({ ...tv, media_type: "tv" as const }))
+      .filter(isValidResult)
+  );
 };
 
 function interleave<A, B>(a: A[], b: B[]): (A | B)[] {
@@ -78,18 +91,22 @@ export const getTopRatedMovies = async (): Promise<Movie[]> => {
   const results = await fetchPages<Omit<Movie, "media_type">>(
     "https://api.themoviedb.org/3/movie/top_rated"
   );
-  return results
-    .map((movie) => ({ ...movie, media_type: "movie" as const }))
-    .filter(isValidResult);
+  return shuffle(
+    results
+      .map((movie) => ({ ...movie, media_type: "movie" as const }))
+      .filter(isValidResult)
+  );
 };
 
 export const getTopRatedTVSeries = async (): Promise<TVSeries[]> => {
   const results = await fetchPages<Omit<TVSeries, "media_type">>(
     "https://api.themoviedb.org/3/tv/top_rated"
   );
-  return results
-    .map((tv) => ({ ...tv, media_type: "tv" as const }))
-    .filter(isValidResult);
+  return shuffle(
+    results
+      .map((tv) => ({ ...tv, media_type: "tv" as const }))
+      .filter(isValidResult)
+  );
 };
 
 export const getTopRatedAll = async (): Promise<TrendingItem[]> => {
@@ -152,4 +169,54 @@ export const getTVSeriesDetails = async (id: number): Promise<TVSeriesDetails | 
   );
   if (!response.ok) return null;
   return response.json();
+};
+
+export const getMovieGenres = async (genreIds: number[]): Promise<Genre[]> => {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/genre/movie/list?language=en-US`,
+    {
+      ...options,
+      next: { revalidate: 60 * 60 * 24 }
+    }
+  );
+  if (!response.ok) return [];
+  const data: GenreResponse = await response.json();
+  return data.genres.filter((genre) => genreIds.includes(genre.id));
+};
+
+export const getTVSeriesGenres = async (genreIds: number[]): Promise<Genre[]> => {
+  const response = await fetch(
+    `https://api.themoviedb.org/3/genre/tv/list?language=en-US`,
+    {
+      ...options,
+      next: { revalidate: 60 * 60 * 24 }
+    },
+  );
+  if (!response.ok) return [];
+  const data: GenreResponse = await response.json();
+  return data.genres.filter((genre) => genreIds.includes(genre.id));
+};
+
+export const discoverMoviesByGenre = async (genreIds: number[]): Promise<Movie[]> => {
+  if (genreIds.length === 0) return [];
+  const results = await fetchPages<Omit<Movie, "media_type">>(
+    `https://api.themoviedb.org/3/discover/movie?with_genres=${genreIds.join("|")}&sort_by=popularity.desc`
+  );
+  return shuffle(
+    results
+      .map((movie) => ({ ...movie, media_type: "movie" as const }))
+      .filter(isValidResult)
+  );
+};
+
+export const discoverTVSeriesByGenre = async (genreIds: number[]): Promise<TVSeries[]> => {
+  if (genreIds.length === 0) return [];
+  const results = await fetchPages<Omit<TVSeries, "media_type">>(
+    `https://api.themoviedb.org/3/discover/tv?with_genres=${genreIds.join("|")}&sort_by=popularity.desc`
+  );
+  return shuffle(
+    results
+      .map((tv) => ({ ...tv, media_type: "tv" as const }))
+      .filter(isValidResult)
+  );
 };

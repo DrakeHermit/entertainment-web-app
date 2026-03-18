@@ -1,12 +1,20 @@
 import RecommendedSection from "@/components/RecommendedSection";
 import RecommendedSectionSkeleton from "@/components/RecommendedSectionSkeleton";
 import { getPopularMovies, searchMovies } from "@/lib/tmdb";
+import { getPersonalizedRecommendations } from "@/lib/recommendations";
 import { getUserId } from "@/lib/auth/checkSessionValid";
 import { Suspense } from "react";
 
 type PageProps = {
   searchParams: Promise<{ q?: string }>;
 };
+
+async function MovieRecommendations({ userId }: { userId?: number }) {
+  const recommended = userId
+    ? await getPersonalizedRecommendations(userId, "movie")
+    : await getPopularMovies();
+  return <RecommendedSection recommended={recommended} userId={userId} />;
+}
 
 const MoviesPage = async ({ searchParams }: PageProps) => {
   const { q } = await searchParams;
@@ -24,13 +32,13 @@ const MoviesPage = async ({ searchParams }: PageProps) => {
     );
   }
 
-  const popular = await getPopularMovies();
-
   return (
     <div>
-      <h2 className="text-3xl font-medium text-white mb-300">Popular Movies</h2>
+      <h2 className="text-3xl font-medium text-white mb-300">
+        {userId ? "Recommended Movies" : "Popular Movies"}
+      </h2>
       <Suspense fallback={<RecommendedSectionSkeleton />}>
-        <RecommendedSection recommended={popular} userId={userId} />
+        <MovieRecommendations userId={userId} />
       </Suspense>
     </div>
   );
