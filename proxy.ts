@@ -3,6 +3,7 @@ import { jwtVerify, SignJWT } from "jose";
 import { drizzle } from "drizzle-orm/neon-http";
 import { eq } from "drizzle-orm";
 import { users } from "@/lib/db/schema";
+import { AUTH_COOKIE_OPTIONS } from "@/lib/auth/setAuthCookies";
 
 const authRoutes = ["/login", "/register"];
 const protectedRoutes = ["/bookmarks", "/profile"];
@@ -31,13 +32,9 @@ async function signToken(userId: string, secret: Uint8Array, expiresIn: number) 
 }
 
 function setAccessTokenCookie(response: NextResponse, accessToken: string) {
-  const secure = process.env.NODE_ENV === "production";
   response.cookies.set("token", accessToken, {
-    httpOnly: true,
-    secure,
-    sameSite: "strict",
+    ...AUTH_COOKIE_OPTIONS,
     maxAge: parseInt(process.env.JWT_EXPIRATION_TIME!),
-    path: "/",
   });
   return response;
 }

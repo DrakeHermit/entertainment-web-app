@@ -6,6 +6,7 @@ import { users } from "@/lib/db/schema";
 import { env } from "@/lib/env";
 import { eq } from "drizzle-orm";
 import { generateRefreshToken, generateToken } from "@/lib/auth/generateToken";
+import { setAuthCookies } from "@/lib/auth/setAuthCookies";
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
@@ -32,20 +33,7 @@ export async function POST(request: NextRequest) {
     const token = generateToken(user[0].id.toString());
     const refreshToken = generateRefreshToken(user[0].id.toString());
     await db.update(users).set({ jwt_token: token, refresh_token: refreshToken }).where(eq(users.id, user[0].id));
-    cookieStore.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: env.JWT_EXPIRATION_TIME,
-      path: "/",
-    });
-    cookieStore.set("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: env.REFRESH_TOKEN_EXPIRATION_TIME,
-      path: "/",
-    });
+    await setAuthCookies(token, refreshToken);
     return NextResponse.json({ error: null, success: true });
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

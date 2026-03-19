@@ -5,10 +5,10 @@ import { db } from "@/lib/db/drizzle";
 import { users } from "@/lib/db/schema";
 import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
-import { cookies } from "next/headers";
 import { ActionState } from "@/lib/types/types";
 import { registerSchema, flattenFieldErrors } from "@/lib/validations/auth";
 import { env } from "@/lib/env";
+import { setAuthCookies } from "@/lib/auth/setAuthCookies";
 
 export async function registerAccount(
   _prevState: ActionState,
@@ -70,22 +70,7 @@ export async function registerAccount(
       .set({ jwt_token: token, refresh_token: refreshToken })
       .where(eq(users.id, user[0].id));
 
-    const cookieStore = await cookies();
-    cookieStore.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: env.JWT_EXPIRATION_TIME,
-      path: "/",
-    });
-
-    cookieStore.set("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: env.REFRESH_TOKEN_EXPIRATION_TIME,
-      path: "/",
-    });
+    await setAuthCookies(token, refreshToken);
 
     return { error: null, success: true };
   } catch {
