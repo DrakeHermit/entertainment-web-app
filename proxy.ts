@@ -84,18 +84,14 @@ export async function proxy(request: NextRequest) {
 
         isAuthenticated = true;
 
-        if (authRoutes.includes(pathname)) {
-          return setAccessTokenCookie(
-            NextResponse.redirect(new URL("/", request.url)),
-            newAccessToken
-          );
-        }
+        const redirectUrl = authRoutes.includes(pathname)
+          ? new URL("/", request.url)
+          : request.nextUrl;
 
-        request.cookies.set("token", newAccessToken);
-        const response = NextResponse.next({
-          request: { headers: request.headers },
-        });
-        return setAccessTokenCookie(response, newAccessToken);
+        return setAccessTokenCookie(
+          NextResponse.redirect(redirectUrl),
+          newAccessToken
+        );
       } else {
         if (user[0]) {
           await database
