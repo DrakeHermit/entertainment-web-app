@@ -28,6 +28,16 @@ function shuffle<T>(array: T[]): T[] {
   return shuffled;
 }
 
+function interleave<A, B>(a: A[], b: B[]): (A | B)[] {
+  const result: (A | B)[] = [];
+  const maxLength = Math.max(a.length, b.length);
+  for (let i = 0; i < maxLength; i++) {
+    if (a[i]) result.push(a[i]);
+    if (b[i]) result.push(b[i]);
+  }
+  return result;
+}
+
 async function fetchPages<T>(
   baseUrl: string,
   pages: number = PAGES_TO_FETCH
@@ -74,16 +84,6 @@ export const getPopularTVSeries = async (): Promise<TVSeries[]> => {
       .filter(isValidResult)
   );
 };
-
-function interleave<A, B>(a: A[], b: B[]): (A | B)[] {
-  const result: (A | B)[] = [];
-  const maxLength = Math.max(a.length, b.length);
-  for (let i = 0; i < maxLength; i++) {
-    if (a[i]) result.push(a[i]);
-    if (b[i]) result.push(b[i]);
-  }
-  return result;
-}
 
 export const getPopularAll = async (): Promise<TrendingItem[]> => {
   const [movies, tvSeries] = await Promise.all([
