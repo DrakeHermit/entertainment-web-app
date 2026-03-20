@@ -1,5 +1,19 @@
 import { TrendingItem } from "./types/types";
 
+export const EXCLUDED_CAROUSEL_GENRE_IDS = new Set([
+  36,  
+  10752, 
+  10768,
+  10764,
+  10763,
+  10766,
+  10767,
+  99,
+  10770
+]);
+
+const MIN_VOTE_AVERAGE = 7;
+
 export function getTitle(item: TrendingItem): string {
   return item.media_type === "movie" ? item.title : item.name;
 }
@@ -9,10 +23,6 @@ export function getReleaseYear(item: TrendingItem): number {
   return date ? new Date(date).getFullYear() : 0;
 }
 
-const NEWS_GENRE_ID = 10763;
-
-const MIN_VOTE_AVERAGE = 5;
-
 export function isValidResult(item: TrendingItem): boolean {
   const title = getTitle(item);
   const year = getReleaseYear(item);
@@ -20,8 +30,9 @@ export function isValidResult(item: TrendingItem): boolean {
     item.backdrop_path &&
     title.length > 3 &&
     year >= 1990 &&
+    item.vote_count >= 1500 &&
     item.vote_average >= MIN_VOTE_AVERAGE &&
-    !item.genre_ids.includes(NEWS_GENRE_ID)
+    !item.genre_ids.some((id) => EXCLUDED_CAROUSEL_GENRE_IDS.has(id))
   );
 }
 
