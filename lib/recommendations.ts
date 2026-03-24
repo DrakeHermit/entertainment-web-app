@@ -12,33 +12,35 @@ export async function getPersonalizedRecommendations(
   userId: number,
   type: "movie" | "series" | "all"
 ): Promise<TrendingItem[]> {
-  let genreIds: number[] = [];
+  let movieGenreIds: number[] = [];
+  let seriesGenreIds: number[] = [];
 
   try {
     const { bookmarkedMoviesData, bookmarkedSeriesData } = await getBookmarkGenres(userId);
-    genreIds = [...new Set([
-      ...bookmarkedMoviesData.flatMap((m) => m.genre_ids ?? []),
-      ...bookmarkedSeriesData.flatMap((s) => s.genre_ids ?? []),
-    ])];
+    movieGenreIds = [...new Set(bookmarkedMoviesData.flatMap((m) => m.genre_ids ?? []))];
+    seriesGenreIds = [...new Set(bookmarkedSeriesData.flatMap((s) => s.genre_ids ?? []))];
   } catch (error) {
     console.error("Failed to fetch bookmark genres:", error);
   }
 
-  if (genreIds.length === 0) {
-    const fallbackResult = await getFallback(type);
-    return fallbackResult;
-  }
-
   try {
     if (type === "movie") {
-      return await discoverMoviesByGenre(genreIds);
-    } else if (type === "series") {
-      return await discoverTVSeriesByGenre(genreIds);
+      if (movieGenreIds.length === 0) return getFallback("movie");
+      return await discoverMoviesByGenre(movieGenreIds);
+    }
+
+    if (type === "series") {
+      if (seriesGenreIds.length === 0) return getFallback("series");
+      return await discoverTVSeriesByGenre(seriesGenreIds);
     }
 
     const [movies, series] = await Promise.all([
-      discoverMoviesByGenre(genreIds),
-      discoverTVSeriesByGenre(genreIds),
+      movieGenreIds.length > 0
+        ? discoverMoviesByGenre(movieGenreIds)
+        : getPopularMovies(),
+      seriesGenreIds.length > 0
+        ? discoverTVSeriesByGenre(seriesGenreIds)
+        : getPopularTVSeries(),
     ]);
 
     const seen = new Set<number>();

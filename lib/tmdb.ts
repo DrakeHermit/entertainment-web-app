@@ -1,7 +1,7 @@
 import { TrendingItem, Movie, TVSeries, TrendingResponse, MovieResponse, TVSeriesResponse, MovieDetails, TVSeriesDetails, Genre, GenreResponse } from "./types/types";
 import { isValidResult, EXCLUDED_CAROUSEL_GENRE_IDS } from "./helpers";
 
-const PAGES_TO_FETCH = 4;
+const PAGES_TO_FETCH = 8;
 
 const options = {
   method: "GET",
